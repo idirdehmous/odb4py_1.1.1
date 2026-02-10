@@ -1,0 +1,205 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Usage &mdash; pyodb 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=fc837d61"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Dependencies" href="Dependencies.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pyodb
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Dependencies.html">Dependencies</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#open-a-ccma-database">Open a CCMA database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#create-the-dca-direct-column-access-files">Create the DCA (Direct Column Access) files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#send-and-fetch-data-from-a-given-ecma-or-ccma">Send and fetch data from a given ECMA or CCMA</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pyodb</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Usage</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/Usage.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="usage">
+<h1>Usage<a class="headerlink" href="#usage" title="Link to this heading"></a></h1>
+<section id="open-a-ccma-database">
+<h2>Open a CCMA database<a class="headerlink" href="#open-a-ccma-database" title="Link to this heading"></a></h2>
+<p>The package pyodb is written in C/Python API. It contains a set of functions as an interface between python and ODB softeware.
+In order to open a given database one has to import the module “odbConnect”. Ths function returns positive value for a seccessful connection and negative if it fails.
+We consider the use of an CCMA odb (The same code  works also for ECMA )</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyodb</span><span class="w"> </span><span class="kn">import</span> <span class="n">odbConnect</span>
+<span class="n">iret</span>  <span class="o">=</span> <span class="n">odbConnect</span><span class="p">(</span><span class="n">odbdir</span> <span class="o">=</span><span class="s2">&quot;imaginary/../CCMA&quot;</span> <span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">npools</span><span class="o">=</span><span class="s2">&quot;1&quot;</span>  <span class="p">)</span>
+<span class="k">if</span> <span class="n">iret</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="p">:</span>
+   <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Failed  to open the odb&quot;</span>  <span class="p">,</span> <span class="n">dbpath</span> <span class="p">)</span>
+   <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="create-the-dca-direct-column-access-files">
+<h2>Create the DCA (Direct Column Access) files<a class="headerlink" href="#create-the-dca-direct-column-access-files" title="Link to this heading"></a></h2>
+<p>In order to fetch the columns and rows, the ODB creates the DCA files first. The latters contain the necessary information about how the data are written on the disk.Such as the starting memory segment and the end of a given table, the size and the offsets between the different tables and columns.</p>
+<p>The DCA files can be created on the fly when any of the binaries such as odbdump.x or odbsql.x are used. In the pyodb package a C/python function is used to create the files before the data fetch. Creating DCA files is relatiely simple,the user has to provide the path the ODB and the number of CPUs used by the task. The ODB path is requiered however, the number of CPUs and the verbosity arguments are optional. The DCA files are written uin a subdirectory  called “dca” inside the ECMA or CCMA directory.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check if the dca directory is already there</span>
+<span class="n">dbpath</span> <span class="o">=</span> <span class="s2">&quot;/path to/imaginary&quot;</span>
+<span class="n">db_type</span><span class="o">=</span> <span class="s2">&quot;CCMA&quot;</span>
+<span class="n">dcapath</span><span class="o">=</span> <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="p">(</span> <span class="n">dbpath</span><span class="p">,</span><span class="n">db_type</span><span class="p">,</span> <span class="n">dcapth</span><span class="p">)</span> <span class="p">)</span>
+
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span> <span class="p">(</span><span class="n">dcapath</span> <span class="p">):</span>
+   <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;IOASSIGN &quot;</span><span class="p">]</span> <span class="o">=</span><span class="n">dbpath</span><span class="o">+</span><span class="s2">&quot;/&quot;</span><span class="o">+</span><span class="n">db_type</span><span class="o">+</span><span class="s2">&quot;/IOASSIGN&quot;</span>
+   <span class="n">ic</span><span class="o">=</span><span class="n">odbDca</span> <span class="p">(</span> <span class="n">dbpath</span><span class="o">=</span><span class="n">dbpath</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span> <span class="n">db_type</span><span class="p">,</span> <span class="n">ncpu</span><span class="o">=</span><span class="mi">8</span>  <span class="p">)</span>  <span class="c1"># in this example 8 CPUs are used</span>
+   <span class="c1"># &#39;ic&#39; is used to check whether the process has successfully ended</span>
+   <span class="c1"># Returns a negative value if it fails and postive in success.</span>
+</pre></div>
+</div>
+</section>
+<section id="send-and-fetch-data-from-a-given-ecma-or-ccma">
+<h2>Send and fetch data from a given ECMA or CCMA<a class="headerlink" href="#send-and-fetch-data-from-a-given-ecma-or-ccma" title="Link to this heading"></a></h2>
+<p>The function used to send an SQL query ,  get the data and store them in a python variable is ‘odbDict’. Note that the ODB rows are returned as a python disctionary with the name of the quered columns as keys and the lists of data as values.
+The function needs some requiered and optional arguments and are described hereafter:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Pure python modules</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyodb_extra.environment</span><span class="w">  </span><span class="kn">import</span>  <span class="n">OdbEnv</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyodb_extra.odb_ob</span><span class="w">       </span><span class="kn">import</span>  <span class="n">OdbObject</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyodb_extra.parser</span><span class="w">       </span><span class="kn">import</span>  <span class="n">StringParser</span>
+
+
+<span class="c1"># C/Python module</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyodb</span><span class="w"> </span><span class="kn">import</span> <span class="n">odbDict</span>
+
+
+
+<span class="c1"># The SQL query</span>
+<span class="c1"># Let&#39;s get the AMDAR/AIREP data only</span>
+<span class="n">sql_query</span><span class="o">=</span><span class="s2">&quot;select   statid ,obstype, varno, degrees(lat) ,  degrees(lon) ,  obsvalue   FROM  hdr, body WHERE obstype == 2&quot;</span>
+
+<span class="c1"># Check the query</span>
+<span class="n">p</span> <span class="o">=</span><span class="n">StringParser</span><span class="p">()</span>
+
+<span class="c1"># The number of functions in the SQL statement</span>
+<span class="c1"># In C ODB code :  N pure columns =   ( N All columns - N functions in sql query)</span>
+<span class="n">nfunc</span>  <span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">ParseTokens</span> <span class="p">(</span> <span class="n">sql_query</span> <span class="p">)</span>
+
+<span class="c1"># Check and clean before sending ! (It remove eventual non-printable characters )</span>
+<span class="n">sql</span>    <span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">CleanString</span> <span class="p">(</span> <span class="n">sql_query</span>  <span class="p">)</span>
+
+<span class="n">nfunctions</span> <span class="o">=</span> <span class="n">nfunc</span>    <span class="c1"># (type -&gt; integer ) Number of columns considring the functions in the sql statement  (degrees, rad, avg etc ...)</span>
+<span class="n">query_file</span> <span class="o">=</span> <span class="kc">None</span>     <span class="c1"># (type -&gt; str     ) The sql file if used rather than sql request string</span>
+<span class="n">poolmask</span>   <span class="o">=</span> <span class="kc">None</span>     <span class="c1"># (type -&gt; str     ) The ODB pools to consider (  must be a string  &quot;1&quot; , &quot;2&quot;, &quot;33&quot; ...  , etc   )</span>
+<span class="n">progress</span>   <span class="o">=</span> <span class="kc">True</span>     <span class="c1"># (type -&gt; bool    ) Progress bar (very useful in the case of huge ODBs )</span>
+<span class="n">float_fmt</span>  <span class="o">=</span> <span class="mi">5</span>        <span class="c1"># (type -&gt; int     ) Number of digits for floats (same syntax )</span>
+<span class="n">verbose</span>    <span class="o">=</span> <span class="kc">False</span>    <span class="c1"># (type -&gt; bool    ) Verbosity  on/off</span>
+
+
+<span class="c1"># SQL query</span>
+<span class="n">sql_query</span><span class="o">=</span><span class="s2">&quot;select   statid ,degrees(lat) ,  degrees(lon) , varno, obsvalue   FROM  hdr, body&quot;</span>
+
+<span class="c1"># Path to ODB</span>
+<span class="n">odbpath</span><span class="o">=</span> <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="p">(</span><span class="n">dbpath</span><span class="p">,</span> <span class="n">db_type</span><span class="p">)</span> <span class="p">)</span>
+
+<span class="c1"># Send and get the data</span>
+<span class="n">data</span> <span class="o">=</span><span class="n">odbDict</span>  <span class="p">(</span><span class="n">dbpath</span> <span class="p">,</span><span class="n">sql</span><span class="p">,</span> <span class="n">nfunctions</span> <span class="p">,</span><span class="n">float_fmt</span><span class="p">,</span> <span class="n">query_file</span> <span class="p">,</span> <span class="n">poolmask</span> <span class="p">,</span> <span class="n">progress</span><span class="p">,</span> <span class="n">verbose</span>  <span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span> <span class="n">data</span> <span class="p">)</span>
+
+
+<span class="p">[</span><span class="c1">##################################################] Complete 100%  (Total: 51 rows)</span>
+
+<span class="p">{</span><span class="n">statid</span><span class="nd">@hdr</span> <span class="p">[</span><span class="s1">&#39;2YIQTRJA&#39;</span><span class="p">,</span> <span class="s1">&#39;2YIQTRJA&#39;</span><span class="p">,</span> <span class="s1">&#39;2YIQTRJA&#39;</span><span class="p">,</span> <span class="s1">&#39;ZUMAVXZA&#39;</span><span class="p">,</span> <span class="s1">&#39;ZUMAVXZA&#39;</span><span class="p">,</span><span class="o">....</span><span class="p">,</span>    <span class="p">]</span>
+<span class="n">obstype</span><span class="nd">@hdr</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="o">.....</span><span class="p">,</span> <span class="p">]</span>
+<span class="n">varno</span><span class="nd">@body</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span><span class="o">.....</span><span class="p">,</span>  <span class="p">]</span>
+<span class="n">degrees</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span> <span class="p">[</span><span class="mf">62.38</span><span class="p">,</span> <span class="mf">62.38</span><span class="p">,</span> <span class="mf">62.38</span><span class="p">,</span> <span class="mf">61.97</span><span class="p">,</span> <span class="mf">61.97</span><span class="p">,</span> <span class="mf">61.97</span><span class="p">,</span> <span class="mf">61.26</span><span class="p">,</span><span class="o">...</span><span class="p">,</span> <span class="p">]</span>
+<span class="n">degrees</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span> <span class="p">[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.35</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.35</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.35</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.54</span><span class="p">,</span><span class="o">....</span> <span class="p">,</span>  <span class="p">]</span>
+<span class="n">obsvalue</span><span class="nd">@body</span> <span class="p">[</span><span class="mf">216.0</span><span class="p">,</span> <span class="mf">28.72984</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.00899</span><span class="p">,</span> <span class="mf">214.2</span><span class="p">,</span> <span class="mf">32.57982</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.5788</span><span class="p">,</span><span class="o">...</span><span class="p">,]</span>  <span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Dependencies.html" class="btn btn-neutral float-left" title="Dependencies" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Idir Dehmous.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
