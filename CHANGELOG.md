@@ -3,7 +3,7 @@
 All notable changes to this packages 
 
 ## [Unreleased]
-pyodb_0.1.0
+odb4py_0.1.0
 
 
 ### Version 0.1.0
@@ -27,10 +27,8 @@ pyodb_0.1.0
 
 ## [Release]
 - VERSION 1.1.0
-- v1.1.0 Date of release : 30/10/2025. 
-- v1.1.0 Add option to the odbFetch option 'only_numeric' , get the numeric data as numpy array or heterogeneous dictionnary (string + num values)
+- v1.1.0 Date of release : 15/12/2025
 - v1.1.0 Tested with ODBs from different ACCORD countries (RMI , CHMI , CHMZ and the global ARPEGE ODBs )
 - v1.1.0 A module called geo_module.c was added. Contains functions to compute the great circle distances from latlon pairs (25-11-2025 )
-
-
-
+- v1.1.0 Compilation using many linux and cuibuildwheel + docker environmment  ( 10/02/2026 )
+- v1.1.0 First packaging on TestPyPi  
