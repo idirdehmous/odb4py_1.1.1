@@ -1,8 +1,6 @@
 #ifndef PYSPAM_H
 #define PYSPAM_H
-
 #define PY_SSIZE_T_CLEAN
-#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #define ODB_STRLEN 8  // 8 chars + '\0' 
 #include <numpy/arrayobject.h>
 #include <numpy/ndarraytypes.h>
