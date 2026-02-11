@@ -1,5 +1,5 @@
 #define PY_SSIZE_T_CLEAN
-#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#define NPY_NO_DEPRECATED_API NPY_2_0_API_VERSION
 #include <ctype.h>
 #include <math.h>
 #include <stdlib.h>
@@ -70,7 +70,7 @@ static PyObject *odbDca_method( PyObject* Py_UNUSED(self) , PyObject *args , PyO
     char* dca_cpu    = concat( dca_db     ,  ncpu_arg  );
     //char* dca_verb   = concat(dca_cpu     ,  quiet    ) ; 
 
-    printf ( "%s\n"  , "--pyodx : Creating DCA files ..." ) ; 
+    printf ( "%s\n"  , "--odb4py : Creating DCA files ..." ) ; 
 
     int status= system ( dca_cpu ) ; 
     if ( status != 0){  
