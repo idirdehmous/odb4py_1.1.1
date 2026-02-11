@@ -164,34 +164,12 @@ init_IOs()
       
       if (io_profile) Profile_newio32_init(newio_myproc); 
 
-    /*  if (newio_myproc == 1) {
-	FILE *fp  ; 
-	fp = fopen("odb4py.stdout"  ,  "w");
-	fprintf(fp,"*** %s:init_IOs() ***\n",__FILE__);
-	fprintf(fp,"\tODB_WRITE_EMPTY_FILES=%d\n",io_write_empty_files);
-	fprintf(fp,"\t  ODB_CONSIDER_TABLES=%s\n",consider_tables);
-	fprintf(fp,"\t   ODB_IO_KEEP_INCORE=%d\n",io_keep_incore);
-	fprintf(fp,"\t      ODB_IO_FILESIZE=%d MB\n",io_filesize);
-	fprintf(fp,"\t       ODB_IO_BUFSIZE=%d bytes\n",io_bufsize);
-	fprintf(fp,"\t       ODB_IO_GRPSIZE=%d (or max no. of pools)\n",io_grpsize);
-	fprintf(fp,"\t       ODB_IO_PROFILE=%d\n",io_profile);
-	fprintf(fp,"\t       ODB_IO_VERBOSE=%d\n",io_verbose);
-	fprintf(fp,"\t        ODB_IO_METHOD=%d\n",io_method);
-	if (version_env) {
-	  fprintf(fp,"\t          ODB_VERSION=%s (environment variable)\n",version_env);
-	}
-	if (version_sw) {
-	  fprintf(fp,"\t          ODB_VERSION=%s (software release)\n",version_sw);
-	}
-	fprintf(fp,"\t          ODB_IO_LOCK=%d\n",io_lock);
-	fprintf(fp,"*********************\n");
-      }  */
 
       if (newio_myproc == 1) {
         //FILE *fp  ; 
         //fp = fopen("odb4py.stdout"  ,  "w");
 	printf("********%s*******" , " New ODB I/O opened with the following environment  \n")  ;
-        printf("*** %s:init_IOs() ***\n",__FILE__);
+        //printf("*** %s:init_IOs() ***\n",__FILE__);
         printf("\tODB_WRITE_EMPTY_FILES=%d\n",io_write_empty_files);
         printf("\t  ODB_CONSIDER_TABLES=%s\n",consider_tables);
         printf("\t   ODB_IO_KEEP_INCORE=%d\n",io_keep_incore);
