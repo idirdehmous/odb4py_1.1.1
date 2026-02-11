@@ -1,6 +1,5 @@
 #define PY_SSIZE_T_CLEAN
-#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
-
+#define NPY_NO_DEPRECATED_API NPY_2_0_API_VERSION
 //NUMPY API 
 #include <numpy/arrayobject.h>
 #include <numpy/ndarraytypes.h>
@@ -85,13 +84,13 @@ static PyObject *odbDict_method(PyObject *Py_UNUSED(self),
 
     // Check number of rows --> check the query answer 
     if ( total_rows ==0 ) {
-      PyErr_SetString(PyExc_RuntimeError, "--pyodx : The SQL request returned zero rows.");  
+      PyErr_SetString(PyExc_RuntimeError, "--odb4py : The SQL request returned zero rows.");  
       return NULL ;  }
     if (total_rows == 0)
     {
         // Specific Exception to  catche in python 
         PyErr_Format(PyOdbEmptyResultError,
-                     "pyodx : SQL query returned zero rows "
+                     "odb4py : SQL query returned zero rows "
                      "(database=%s, query=\"%s\")",
                      database ? database : "(null)",
                      sql_query ? sql_query : "(null)");
@@ -114,7 +113,7 @@ static PyObject *odbDict_method(PyObject *Py_UNUSED(self),
     h = odbdump_open(database, sql_query, queryfile, poolmask, varvalue, &maxcols);
     //Py_END_ALLOW_THREADS
     if (!h || maxcols <= 0) {
-        PyErr_SetString(PyExc_RuntimeError, "--pyodx : Failed to open ODB or invalid number of columns");
+        PyErr_SetString(PyExc_RuntimeError, "--odb4py : Failed to open ODB or invalid number of columns");
         return NULL  ; }
     // Number of columns taking into account the number of functions in the query  (col pure - n columns function)
     int ncols = maxcols - fcols;
@@ -122,8 +121,8 @@ static PyObject *odbDict_method(PyObject *Py_UNUSED(self),
     double *buffer    = (double *)malloc(sizeof(double) * (size_t)total_rows * (size_t)ncols);
     char  **strbufs   = (char**)calloc((size_t)ncols, sizeof(char*));
     // If allocation failed  close !
-    if (!buffer) { odbdump_close(h);  PyErr_SetString(PyExc_RuntimeError, "--pyodx : Failed to allocate memory buffer for numeric values ");  return NULL ;  }
-    if (!strbufs){ odbdump_close(h);  PyErr_SetString(PyExc_RuntimeError, "--pyodx : Failed to allocate memory buffer for string  values ");  return NULL ;  }
+    if (!buffer) { odbdump_close(h);  PyErr_SetString(PyExc_RuntimeError, "--odb4py : Failed to allocate memory buffer for numeric values ");  return NULL ;  }
+    if (!strbufs){ odbdump_close(h);  PyErr_SetString(PyExc_RuntimeError, "--odb4py : Failed to allocate memory buffer for string  values ");  return NULL ;  }
     if (verbose)   printf("Number of requested columns : %d\n", ncols);
    // Internal ODB vars 
     int new_dataset = 0;
@@ -141,13 +140,13 @@ static PyObject *odbDict_method(PyObject *Py_UNUSED(self),
    // List to hold the column names  and values 
    PyObject **col_lists        = (PyObject **)malloc(ncols * sizeof(PyObject *));
    if (!col_lists) { 
-	PyErr_SetString(PyExc_RuntimeError, "--pyodx : PyObject memory allocation error");  
+	PyErr_SetString(PyExc_RuntimeError, "--odb4py : PyObject memory allocation error");  
 	return NULL  ;
    }
    // Dict object 
    PyObject  *dict = PyDict_New();
    if (!dict) {
-        PyErr_SetString(PyExc_RuntimeError, "--pyodx : PyObject dictionary allocation error");
+        PyErr_SetString(PyExc_RuntimeError, "--odb4py : PyObject dictionary allocation error");
        return NULL  ; 
     }
    // Init buffer strings 
@@ -158,7 +157,7 @@ static PyObject *odbDict_method(PyObject *Py_UNUSED(self),
     for (int i = 0; i < ncols; ++i) {
         col_lists[i] = PyList_New(total_rows);
         if (!col_lists[i]) {
-            PyErr_SetString(PyExc_RuntimeError, "--pyodx : PyObject memory allocation error");
+            PyErr_SetString(PyExc_RuntimeError, "--odb4py : PyObject memory allocation error");
              return NULL  ; 
         } }
     // Loop over the rows    
