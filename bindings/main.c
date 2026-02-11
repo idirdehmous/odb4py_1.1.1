@@ -39,7 +39,7 @@ static PyMethodDef module_methods[] = {
     {"odbGcdistance"  ,  (PyCFunction)(void(*)(void))      odbGcdistance_method   ,
      METH_VARARGS | METH_KEYWORDS,   "Compute great circle distance between numpy lat/lon pairs"},
 
-    {"version", odbMeta_version, METH_NOARGS, "Return the pyodx version."},
+    {"version", odbMeta_version, METH_NOARGS, "Return the odb4py version."},
 
     {"info",    odbMeta_info,    METH_NOARGS, "Return build and Python info."},
 
@@ -61,19 +61,20 @@ static struct PyModuleDef   odbmodule = {
 // Called first during python call
 PyMODINIT_FUNC PyInit_core (void) {
 
-    import_array();   //   Init  Numpy C API 
-
+    if (_import_array() < 0) {
+        return NULL;
+    }
 
     PyObject*  m  ;
     PyObject* ModuleError ;
     m=PyModule_Create(&odbmodule);
     if ( m == NULL) {
-        ModuleError = PyErr_NewException("Failed to create the module : pyodb core", NULL, NULL);
+        ModuleError = PyErr_NewException("Failed to create the module : odb4py core", NULL, NULL);
         Py_XINCREF(ModuleError) ;
         return NULL;
 }
 
-PyOdbEmptyResultError = PyErr_NewException("pyodx.EmptyResultError", NULL, NULL);
+PyOdbEmptyResultError = PyErr_NewException("odb4py.EmptyResultError", NULL, NULL);
 Py_INCREF(PyOdbEmptyResultError);
 PyModule_AddObject(m , "EmptyResultError", PyOdbEmptyResultError);
 
