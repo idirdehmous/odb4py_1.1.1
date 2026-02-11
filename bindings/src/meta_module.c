@@ -3,11 +3,11 @@
 #include <stdio.h>
 
 // Version 
-#define PYODX_VERSION "1.2.0"
+#define ODB4PY_VERSION "1.0.0"
 
 // return version  
 static PyObject* odbMeta_version(PyObject *self, PyObject *Py_UNUSED(ignored)) {
-    return Py_BuildValue("s", PYODX_VERSION);
+    return Py_BuildValue("s", ODB4PY_VERSION);
 }
 
 
@@ -15,7 +15,7 @@ static PyObject* odbMeta_version(PyObject *self, PyObject *Py_UNUSED(ignored)) {
 static PyObject* odbMeta_info(PyObject *self, PyObject *Py_UNUSED(ignored)) {
     return Py_BuildValue(
         "{s:s, s:s, s:s, s:s}",
-        "version"     , PYODX_VERSION,
+        "version"     , ODB4PY_VERSION,
         "compiler"    , Py_GetCompiler() ,
         "platform"    , Py_GetPlatform() ,
         "python_build", Py_GetBuildInfo()
