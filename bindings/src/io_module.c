@@ -52,7 +52,7 @@ static PUBLIC   PyObject*   odbConnect_method ( PyObject *Py_UNUSED(self) , PyOb
 					    &npools 
 					    ))
        {
-	PyErr_SetString(PyExc_ValueError, "--pyodx  odbConnect(): invalid arguments. Use odbConnect('/path to.../ODB').");
+	PyErr_SetString(PyExc_ValueError, "--odb4py  odbConnect(): invalid arguments. Use odbConnect('/path to.../ODB').");
         return NULL;
        }
     
@@ -101,7 +101,7 @@ static PUBLIC   PyObject*   odbConnect_method ( PyObject *Py_UNUSED(self) , PyOb
     }
 
     if (!ph) {
-      fprintf(stderr, "--pyodx : Unable to open ODB '%s': too many open databases (max=%d).\n",
+      fprintf(stderr, "--odb4py : Unable to open ODB '%s': too many open databases (max=%d).\n",
                 dbname , maxhandle);
       fprintf( stderr ,
               "\tMax. no. of open databases currently = %d. Increase via export ODB_MAXHANDLE\n",
@@ -238,13 +238,13 @@ static PUBLIC   PyObject*   odbConnect_method ( PyObject *Py_UNUSED(self) , PyOb
       int iounit = -1;
       cma_open_(&iounit, p_dbname , "r", &iret, strlen(p_dbname), 1);
       if (iret < 1) {
-        fprintf(stderr, BRED "--pyodx : Could not open ODB '%s' (iret=%d)\n" reset,
+        fprintf(stderr, BRED "--odb4py : Could not open ODB '%s' (iret=%d)\n" reset,
                 srcpath_dbname , iret);
         error = true;
              } 
       else{
 	if (lverb ) {
-         fprintf(stderr, BGRN "--pyodx : Successfully opened ODB '%s'\n" reset,  srcpath_dbname );
+         fprintf(stderr, BGRN "--odb4py : Successfully opened ODB '%s'\n" reset,  srcpath_dbname );
 	}
 
        }
@@ -312,7 +312,7 @@ static PUBLIC PyObject *odbClose_method(PyObject *Py_UNUSED(self), PyObject *arg
 {
     int handle = 0;
     if (!PyArg_ParseTuple(args, "i", &handle)) {
-        PyErr_SetString(PyExc_ValueError, "--pyodx : odbClose(handle): expected integer handle.");
+        PyErr_SetString(PyExc_ValueError, "--odb4py : odbClose(handle): expected integer handle.");
         return NULL;
     }
     if (free_handles && handle >= 1 && handle <= maxhandle) {
@@ -328,14 +328,14 @@ static PUBLIC PyObject *odbClose_method(PyObject *Py_UNUSED(self), PyObject *arg
                 FREE(ph->tblname);
             }
             ph->tblname = NULL;
-	    printf("--pyodx : database closed !. \n" );
+	    printf("--odb4py : database closed !. \n" );
             return PyLong_FromLong(1);
         }
     }
     // The handle is already free 
     if (!handle) {
 
-    printf("%s\n", "--pyodx : database closed !") ;
+    printf("%s\n", "--odb4py : database closed !") ;
     return PyLong_FromLong(1); 
     }
     return NULL ; 
