@@ -8,8 +8,8 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'odb4py'
-copyright = '2024, Idir DEHMOUS'
-author = 'Idir DEHMOUS'
+copyright = '2024, I.Dehmous'
+author = 'I.DEHMOUS'
 release = '0.1.0'
 
 # -- General configuration ---------------------------------------------------

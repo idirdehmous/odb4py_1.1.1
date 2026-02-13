@@ -1,11 +1,10 @@
-pyodb documentation
-===================
+odb4py documentation
+====================
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+    :maxdepth: 3
+    :caption: Contents:
 
-   Introduction 
-   Installation 
-   Dependencies 
-   Usage 
+    Introduction 
+    Installation
+    Usage

@@ -6,9 +6,9 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Usage &mdash; pyodb 1.1.0 documentation</title>
+  <title>Usage &mdash; odb4py 1.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
@@ -19,7 +19,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Dependencies" href="Dependencies.html" /> 
+    <link rel="prev" title="Installation" href="Installation.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -31,7 +31,7 @@
           
           
           <a href="index.html" class="icon icon-home">
-            pyodb
+            odb4py
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -45,13 +45,11 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Dependencies.html">Dependencies</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Usage</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#open-a-ccma-database">Open a CCMA database</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#create-the-dca-direct-column-access-files">Create the DCA (Direct Column Access) files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#send-and-fetch-data-from-a-given-ecma-or-ccma">Send and fetch data from a given ECMA or CCMA</a></li>
-</ul>
-</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#opening-a-ccma-database">Opening a CCMA Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#creating-dca-direct-column-access-files">Creating DCA (Direct Column Access) Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#sql-query-and-data-retrieval">SQL Query and Data Retrieval</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#data-structure-and-integration-with-the-python-ecosystem">Data Structure and Integration with the Python Ecosystem</a></li>
 </ul>
 
         </div>
@@ -60,7 +58,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">pyodb</a>
+          <a href="index.html">odb4py</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -80,109 +78,238 @@
              
   <section id="usage">
 <h1>Usage<a class="headerlink" href="#usage" title="Link to this heading"></a></h1>
-<section id="open-a-ccma-database">
-<h2>Open a CCMA database<a class="headerlink" href="#open-a-ccma-database" title="Link to this heading"></a></h2>
-<p>The package pyodb is written in C/Python API. It contains a set of functions as an interface between python and ODB softeware.
-In order to open a given database one has to import the module “odbConnect”. Ths function returns positive value for a seccessful connection and negative if it fails.
-We consider the use of an CCMA odb (The same code  works also for ECMA )</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyodb</span><span class="w"> </span><span class="kn">import</span> <span class="n">odbConnect</span>
-<span class="n">iret</span>  <span class="o">=</span> <span class="n">odbConnect</span><span class="p">(</span><span class="n">odbdir</span> <span class="o">=</span><span class="s2">&quot;imaginary/../CCMA&quot;</span> <span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">npools</span><span class="o">=</span><span class="s2">&quot;1&quot;</span>  <span class="p">)</span>
-<span class="k">if</span> <span class="n">iret</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="p">:</span>
-   <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Failed  to open the odb&quot;</span>  <span class="p">,</span> <span class="n">dbpath</span> <span class="p">)</span>
-   <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<p><strong>odb4py</strong> provides two main modules:</p>
+<ul class="simple">
+<li><p><strong>odb4py.core</strong>: A set of low-level functions interfacing Python with the ODB runtime libraries.</p></li>
+<li><p><strong>odb4py.utils</strong>: A collection of pure Python helper utilities, for example to initialize the ODB environment, parse or sanitize SQL queries, and manage auxiliary tasks.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In the following examples, a CCMA ODB database is used.
+However, the same code is fully applicable to an ECMA database.</p>
+</div>
+</section>
+<section id="opening-a-ccma-database">
+<h1>Opening a CCMA Database<a class="headerlink" href="#opening-a-ccma-database" title="Link to this heading"></a></h1>
+<p>To open a given database, the <code class="docutils literal notranslate"><span class="pre">odbConnect</span></code> function from the
+<code class="docutils literal notranslate"><span class="pre">odb4py.core</span></code> module must be used. This function returns a
+positive value if the connection is successful and a negative
+value if it fails.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#-*- coding: utf-8 -*-</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w">  </span><span class="nn">odb4py.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">OdbEnv</span>
+
+<span class="c1"># Initialize the odb4py  environnment</span>
+<span class="n">env</span><span class="o">=</span> <span class="n">odbEnv</span><span class="p">()</span>
+<span class="n">env</span><span class="o">.</span><span class="n">InitEnv</span><span class="p">()</span>
+
+<span class="c1"># Import method</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">odb4py.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">odbConnect</span>
+
+<span class="c1"># Path to a CCMA database</span>
+<span class="n">dbpath</span> <span class="o">=</span> <span class="s2">&quot;/imaginary/path/CCMA&quot;</span>
+
+<span class="c1"># Attempt to open the database</span>
+<span class="n">iret</span> <span class="o">=</span> <span class="n">odbConnect</span><span class="p">(</span><span class="n">odbdir</span><span class="o">=</span><span class="n">dbpath</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Check the return code</span>
+<span class="k">if</span> <span class="n">iret</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Failed to open the ODB database:&quot;</span><span class="p">,</span> <span class="n">dbpath</span><span class="p">)</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
-<section id="create-the-dca-direct-column-access-files">
-<h2>Create the DCA (Direct Column Access) files<a class="headerlink" href="#create-the-dca-direct-column-access-files" title="Link to this heading"></a></h2>
-<p>In order to fetch the columns and rows, the ODB creates the DCA files first. The latters contain the necessary information about how the data are written on the disk.Such as the starting memory segment and the end of a given table, the size and the offsets between the different tables and columns.</p>
-<p>The DCA files can be created on the fly when any of the binaries such as odbdump.x or odbsql.x are used. In the pyodb package a C/python function is used to create the files before the data fetch. Creating DCA files is relatiely simple,the user has to provide the path the ODB and the number of CPUs used by the task. The ODB path is requiered however, the number of CPUs and the verbosity arguments are optional. The DCA files are written uin a subdirectory  called “dca” inside the ECMA or CCMA directory.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check if the dca directory is already there</span>
-<span class="n">dbpath</span> <span class="o">=</span> <span class="s2">&quot;/path to/imaginary&quot;</span>
-<span class="n">db_type</span><span class="o">=</span> <span class="s2">&quot;CCMA&quot;</span>
-<span class="n">dcapath</span><span class="o">=</span> <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="p">(</span> <span class="n">dbpath</span><span class="p">,</span><span class="n">db_type</span><span class="p">,</span> <span class="n">dcapth</span><span class="p">)</span> <span class="p">)</span>
+<section id="creating-dca-direct-column-access-files">
+<h1>Creating DCA (Direct Column Access) Files<a class="headerlink" href="#creating-dca-direct-column-access-files" title="Link to this heading"></a></h1>
+<p>In order to retrieve rows and columns efficiently, ODB relies on
+<strong>DCA (Direct Column Access)</strong> files.</p>
+<p>DCA files contain structural metadata describing how the data are
+physically stored on disk. This includes, for example:</p>
+<ul class="simple">
+<li><p>The starting and ending memory segments of a given table,</p></li>
+<li><p>Column sizes,</p></li>
+<li><p>Offsets between tables and columns,</p></li>
+<li><p>Internal layout information required for fast access.</p></li>
+</ul>
+<p>DCA files can be created automatically when using ODB binaries such as
+<code class="docutils literal notranslate"><span class="pre">odbdump.x</span></code> or <code class="docutils literal notranslate"><span class="pre">odbsql.x</span></code>. They can also be generated explicitly
+using the <code class="docutils literal notranslate"><span class="pre">dcagen</span></code> script or the <code class="docutils literal notranslate"><span class="pre">dcagen.x</span></code> binary.</p>
+<p>Within the <strong>odb4py</strong> package, a dedicated function <code class="docutils literal notranslate"><span class="pre">odbDca</span></code> is provided to
+generate DCA files programmatically before executing a query.</p>
+<p>Creating DCA files is straightforward: the user must provide the path
+to the ODB database. The number of CPUs used for the task and the
+verbosity level are optional parameters.</p>
+<p>The generated DCA files are written into a subdirectory named
+<code class="docutils literal notranslate"><span class="pre">dca</span></code> inside the corresponding <code class="docutils literal notranslate"><span class="pre">ECMA</span></code> or <code class="docutils literal notranslate"><span class="pre">CCMA</span></code> directory.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#-*- coding: utf-8 -*-</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="w"> </span><span class="o">,</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w">   </span><span class="nn">odb4py.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">OdbEnv</span>
 
-<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span> <span class="p">(</span><span class="n">dcapath</span> <span class="p">):</span>
-   <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;IOASSIGN &quot;</span><span class="p">]</span> <span class="o">=</span><span class="n">dbpath</span><span class="o">+</span><span class="s2">&quot;/&quot;</span><span class="o">+</span><span class="n">db_type</span><span class="o">+</span><span class="s2">&quot;/IOASSIGN&quot;</span>
-   <span class="n">ic</span><span class="o">=</span><span class="n">odbDca</span> <span class="p">(</span> <span class="n">dbpath</span><span class="o">=</span><span class="n">dbpath</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span> <span class="n">db_type</span><span class="p">,</span> <span class="n">ncpu</span><span class="o">=</span><span class="mi">8</span>  <span class="p">)</span>  <span class="c1"># in this example 8 CPUs are used</span>
-   <span class="c1"># &#39;ic&#39; is used to check whether the process has successfully ended</span>
-   <span class="c1"># Returns a negative value if it fails and postive in success.</span>
+<span class="c1"># Initialize the odb4py  environnment</span>
+<span class="n">env</span><span class="o">=</span> <span class="n">odbEnv</span><span class="p">()</span>
+<span class="n">env</span><span class="o">.</span><span class="n">InitEnv</span><span class="p">()</span>
+
+<span class="c1"># Import the  method</span>
+<span class="kn">from</span><span class="w">   </span><span class="nn">odb4py.core</span><span class="w">  </span><span class="kn">import</span> <span class="n">odbDca</span>
+
+<span class="n">db_type</span>  <span class="o">=</span> <span class="s2">&quot;CCMA&quot;</span>
+<span class="n">db_path</span>  <span class="o">=</span> <span class="s2">&quot;/imaginary/path/&quot;</span>
+<span class="n">dca_path</span> <span class="o">=</span> <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="p">(</span> <span class="n">dbpath</span><span class="p">,</span> <span class="n">db_type</span><span class="p">,</span> <span class="s2">&quot;dca&quot;</span> <span class="p">)</span> <span class="p">)</span>
+<span class="n">NCPU</span>     <span class="o">=</span> <span class="mi">8</span>
+
+<span class="c1"># Check if the files existe</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span> <span class="p">(</span><span class="n">dca_path</span> <span class="p">):</span>
+   <span class="n">ic</span> <span class="o">=</span><span class="n">odbDca</span> <span class="p">(</span> <span class="n">db_path</span><span class="o">=</span><span class="n">db_path</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span> <span class="n">db_type</span><span class="p">,</span> <span class="n">ncpu</span><span class="o">=</span> <span class="n">NCPU</span>  <span class="p">)</span>
+   <span class="k">if</span> <span class="n">ic</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="p">:</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Failed to create DCA files&quot;</span><span class="p">)</span>
+      <span class="n">sys</span><span class="o">.</span><span class="n">exist</span><span class="p">()</span>
 </pre></div>
 </div>
 </section>
-<section id="send-and-fetch-data-from-a-given-ecma-or-ccma">
-<h2>Send and fetch data from a given ECMA or CCMA<a class="headerlink" href="#send-and-fetch-data-from-a-given-ecma-or-ccma" title="Link to this heading"></a></h2>
-<p>The function used to send an SQL query ,  get the data and store them in a python variable is ‘odbDict’. Note that the ODB rows are returned as a python disctionary with the name of the quered columns as keys and the lists of data as values.
-The function needs some requiered and optional arguments and are described hereafter:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Pure python modules</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyodb_extra.environment</span><span class="w">  </span><span class="kn">import</span>  <span class="n">OdbEnv</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyodb_extra.odb_ob</span><span class="w">       </span><span class="kn">import</span>  <span class="n">OdbObject</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyodb_extra.parser</span><span class="w">       </span><span class="kn">import</span>  <span class="n">StringParser</span>
+<section id="sql-query-and-data-retrieval">
+<h1>SQL Query and Data Retrieval<a class="headerlink" href="#sql-query-and-data-retrieval" title="Link to this heading"></a></h1>
+<p>The SQL syntax used in <strong>odb4py</strong> follows the same conventions as the
+official ODB API.</p>
+<p>To perform a data query, the function <code class="docutils literal notranslate"><span class="pre">odbDict</span></code> must be used.
+This function returns both the column names and the corresponding row
+values organized as a Python dictionary. In this dictionary, column
+names are used as keys, and the associated values correspond to the
+retrieved ODB data rows.</p>
+<p>Before executing the query, a preliminary syntax validation step is
+performed using the <code class="docutils literal notranslate"><span class="pre">ParseTokens</span></code> and <code class="docutils literal notranslate"><span class="pre">CleanString</span></code> functions inside the <code class="docutils literal notranslate"><span class="pre">utils</span></code> module. This includes:
+- Removing non-printable characters.
+- Filtering out tokens that are not part of the ODB SQL lexicon.
+- Parsing SQL tokens to determine the number of ODB SQL functions used within the request.</p>
+<p>At the low level, the total number of columns to be retrieved is equal
+to the number of explicit column names plus the number of computed
+columns resulting from SQL functions.</p>
+<p>Consequently, the C backend must internally distinguish between
+pure column references and function-based expressions in order to
+correctly process and return the requested data.</p>
+<p>This preprocessing stage ensures robustness and prevents malformed SQL
+queries from reaching the ODB runtime layer.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#-*- coding: utf-8 -*-</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">odb4py.utils</span><span class="w"> </span><span class="kn">import</span>  <span class="n">OdbEnv</span> <span class="p">,</span><span class="n">OdbObject</span> <span class="p">,</span> <span class="n">StringParser</span>
+
+<span class="c1"># Initialize the ODB environnment first</span>
+<span class="n">env</span> <span class="o">=</span><span class="n">OdbEnv</span><span class="p">()</span>
+<span class="n">env</span><span class="o">.</span><span class="n">InitEnv</span><span class="p">()</span>
+
+<span class="c1"># Import the C/Python module</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">odb4py</span><span class="w"> </span><span class="kn">import</span> <span class="n">odbDict</span>
 
 
-<span class="c1"># C/Python module</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyodb</span><span class="w"> </span><span class="kn">import</span> <span class="n">odbDict</span>
+<span class="c1"># Path to ODB</span>
+<span class="n">db_path</span><span class="o">=</span> <span class="s2">&quot;/imaginary/path/../CCMA&quot;</span>
 
-
-
+<span class="c1"># Let&#39;s get the AMDAR data (obstype =2 )</span>
 <span class="c1"># The SQL query</span>
-<span class="c1"># Let&#39;s get the AMDAR/AIREP data only</span>
-<span class="n">sql_query</span><span class="o">=</span><span class="s2">&quot;select   statid ,obstype, varno, degrees(lat) ,  degrees(lon) ,  obsvalue   FROM  hdr, body WHERE obstype == 2&quot;</span>
+<span class="n">sql_query</span><span class="o">=</span><span class="s2">&quot;SELECT statid , obstype, varno, degrees(lat) ,  degrees(lon) , obsvalue   FROM  hdr, body WHERE obstype==2&quot;</span>
 
-<span class="c1"># Check the query</span>
+<span class="c1"># Check &amp; clean the query</span>
 <span class="n">p</span> <span class="o">=</span><span class="n">StringParser</span><span class="p">()</span>
 
 <span class="c1"># The number of functions in the SQL statement</span>
-<span class="c1"># In C ODB code :  N pure columns =   ( N All columns - N functions in sql query)</span>
 <span class="n">nfunc</span>  <span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">ParseTokens</span> <span class="p">(</span> <span class="n">sql_query</span> <span class="p">)</span>
 
-<span class="c1"># Check and clean before sending ! (It remove eventual non-printable characters )</span>
+<span class="c1"># Check and clean before sending !</span>
 <span class="n">sql</span>    <span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">CleanString</span> <span class="p">(</span> <span class="n">sql_query</span>  <span class="p">)</span>
 
+<span class="c1"># Arguments</span>
 <span class="n">nfunctions</span> <span class="o">=</span> <span class="n">nfunc</span>    <span class="c1"># (type -&gt; integer ) Number of columns considring the functions in the sql statement  (degrees, rad, avg etc ...)</span>
 <span class="n">query_file</span> <span class="o">=</span> <span class="kc">None</span>     <span class="c1"># (type -&gt; str     ) The sql file if used rather than sql request string</span>
 <span class="n">poolmask</span>   <span class="o">=</span> <span class="kc">None</span>     <span class="c1"># (type -&gt; str     ) The ODB pools to consider (  must be a string  &quot;1&quot; , &quot;2&quot;, &quot;33&quot; ...  , etc   )</span>
 <span class="n">progress</span>   <span class="o">=</span> <span class="kc">True</span>     <span class="c1"># (type -&gt; bool    ) Progress bar (very useful in the case of huge ODBs )</span>
-<span class="n">float_fmt</span>  <span class="o">=</span> <span class="mi">5</span>        <span class="c1"># (type -&gt; int     ) Number of digits for floats (same syntax )</span>
+<span class="n">float_fmt</span>  <span class="o">=</span> <span class="mi">5</span>        <span class="c1"># (type -&gt; int     ) Number of decimal digits for floats</span>
 <span class="n">verbose</span>    <span class="o">=</span> <span class="kc">False</span>    <span class="c1"># (type -&gt; bool    ) Verbosity  on/off</span>
 
-
-<span class="c1"># SQL query</span>
-<span class="n">sql_query</span><span class="o">=</span><span class="s2">&quot;select   statid ,degrees(lat) ,  degrees(lon) , varno, obsvalue   FROM  hdr, body&quot;</span>
-
-<span class="c1"># Path to ODB</span>
-<span class="n">odbpath</span><span class="o">=</span> <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="p">(</span><span class="n">dbpath</span><span class="p">,</span> <span class="n">db_type</span><span class="p">)</span> <span class="p">)</span>
-
-<span class="c1"># Send and get the data</span>
+<span class="c1"># Send the query and get the data</span>
 <span class="n">data</span> <span class="o">=</span><span class="n">odbDict</span>  <span class="p">(</span><span class="n">dbpath</span> <span class="p">,</span><span class="n">sql</span><span class="p">,</span> <span class="n">nfunctions</span> <span class="p">,</span><span class="n">float_fmt</span><span class="p">,</span> <span class="n">query_file</span> <span class="p">,</span> <span class="n">poolmask</span> <span class="p">,</span> <span class="n">progress</span><span class="p">,</span> <span class="n">verbose</span>  <span class="p">)</span>
-
 <span class="nb">print</span><span class="p">(</span> <span class="n">data</span> <span class="p">)</span>
-
+</pre></div>
+</div>
+<p>Output :</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">********</span> <span class="n">New</span> <span class="n">ODB</span> <span class="n">I</span><span class="o">/</span><span class="n">O</span> <span class="n">opened</span> <span class="k">with</span> <span class="n">the</span> <span class="n">following</span> <span class="n">environment</span>
+<span class="o">*******</span>      <span class="n">ODB_WRITE_EMPTY_FILES</span><span class="o">=</span><span class="mi">0</span>
+       <span class="n">ODB_CONSIDER_TABLES</span><span class="o">=*</span>
+        <span class="n">ODB_IO_KEEP_INCORE</span><span class="o">=</span><span class="mi">1</span>
+           <span class="n">ODB_IO_FILESIZE</span><span class="o">=</span><span class="mi">32</span> <span class="n">MB</span>
+            <span class="n">ODB_IO_BUFSIZE</span><span class="o">=</span><span class="mi">4194304</span> <span class="nb">bytes</span>
+            <span class="n">ODB_IO_GRPSIZE</span><span class="o">=</span><span class="mi">1</span> <span class="p">(</span><span class="ow">or</span> <span class="nb">max</span> <span class="n">no</span><span class="o">.</span> <span class="n">of</span> <span class="n">pools</span><span class="p">)</span>
+            <span class="n">ODB_IO_PROFILE</span><span class="o">=</span><span class="mi">0</span>
+            <span class="n">ODB_IO_VERBOSE</span><span class="o">=</span><span class="mi">0</span>
+             <span class="n">ODB_IO_METHOD</span><span class="o">=</span><span class="mi">5</span>
+<span class="n">ODB_CONSIDER_TABLES</span><span class="o">=*</span>
+<span class="n">ODB_WRITE_TABLES</span><span class="o">=*</span>
+<span class="o">***</span><span class="n">INFO</span><span class="p">:</span> <span class="n">Poolmasking</span> <span class="n">ignored</span> <span class="n">altogether</span> <span class="k">for</span> <span class="n">database</span> <span class="s1">&#39;CCMA&#39;</span>
+<span class="o">--</span><span class="n">odb4py</span> <span class="p">:</span> <span class="n">Creating</span> <span class="n">DCA</span> <span class="n">files</span> <span class="o">...</span><span class="n">done</span> <span class="err">!</span>
 
 <span class="p">[</span><span class="c1">##################################################] Complete 100%  (Total: 51 rows)</span>
-
-<span class="p">{</span><span class="n">statid</span><span class="nd">@hdr</span> <span class="p">[</span><span class="s1">&#39;2YIQTRJA&#39;</span><span class="p">,</span> <span class="s1">&#39;2YIQTRJA&#39;</span><span class="p">,</span> <span class="s1">&#39;2YIQTRJA&#39;</span><span class="p">,</span> <span class="s1">&#39;ZUMAVXZA&#39;</span><span class="p">,</span> <span class="s1">&#39;ZUMAVXZA&#39;</span><span class="p">,</span><span class="o">....</span><span class="p">,</span>    <span class="p">]</span>
-<span class="n">obstype</span><span class="nd">@hdr</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="o">.....</span><span class="p">,</span> <span class="p">]</span>
-<span class="n">varno</span><span class="nd">@body</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span><span class="o">.....</span><span class="p">,</span>  <span class="p">]</span>
-<span class="n">degrees</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span> <span class="p">[</span><span class="mf">62.38</span><span class="p">,</span> <span class="mf">62.38</span><span class="p">,</span> <span class="mf">62.38</span><span class="p">,</span> <span class="mf">61.97</span><span class="p">,</span> <span class="mf">61.97</span><span class="p">,</span> <span class="mf">61.97</span><span class="p">,</span> <span class="mf">61.26</span><span class="p">,</span><span class="o">...</span><span class="p">,</span> <span class="p">]</span>
-<span class="n">degrees</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span> <span class="p">[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.35</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.35</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.35</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.54</span><span class="p">,</span><span class="o">....</span> <span class="p">,</span>  <span class="p">]</span>
-<span class="n">obsvalue</span><span class="nd">@body</span> <span class="p">[</span><span class="mf">216.0</span><span class="p">,</span> <span class="mf">28.72984</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.00899</span><span class="p">,</span> <span class="mf">214.2</span><span class="p">,</span> <span class="mf">32.57982</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.5788</span><span class="p">,</span><span class="o">...</span><span class="p">,]</span>  <span class="p">}</span>
+<span class="p">{</span><span class="s1">&#39;statid@hdr&#39;</span><span class="p">:[</span><span class="s1">&#39;2YIQTRJA&#39;</span><span class="p">,</span> <span class="s1">&#39;2YIQTRJA&#39;</span><span class="p">,</span> <span class="s1">&#39;2YIQTRJA&#39;</span><span class="o">.....</span><span class="p">,</span> <span class="p">],</span>
+ <span class="s1">&#39;obstype@hdr&#39;</span><span class="p">:[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span><span class="o">....</span><span class="p">]</span> <span class="p">,</span>
+ <span class="s1">&#39;varno@body&#39;</span><span class="p">:[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span> <span class="p">,</span><span class="o">....</span><span class="p">],</span>
+ <span class="s1">&#39;degrees(lat)&#39;</span><span class="p">:[</span><span class="mf">62.38014</span><span class="p">,</span> <span class="mf">62.38078</span><span class="p">,</span> <span class="mf">62.38124</span><span class="p">,</span><span class="o">...</span><span class="p">],</span>
+ <span class="s1">&#39;degrees(lon)&#39;</span><span class="p">:[</span><span class="mf">1.15</span><span class="p">,</span> <span class="mf">1.12</span><span class="p">,</span> <span class="mf">1.14</span><span class="p">,</span><span class="o">....</span><span class="p">]</span> <span class="p">,</span>
+ <span class="s1">&#39;obsvalue@body&#39;</span><span class="p">:[</span><span class="mf">216.00144</span><span class="p">,</span> <span class="mf">28.72984</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.00899</span> <span class="p">]}</span>
 </pre></div>
 </div>
 </section>
+<section id="data-structure-and-integration-with-the-python-ecosystem">
+<h1>Data Structure and Integration with the Python Ecosystem<a class="headerlink" href="#data-structure-and-integration-with-the-python-ecosystem" title="Link to this heading"></a></h1>
+<p>The choice to return query results as a Python dictionary is deliberate and central to the design of <strong>odb4py</strong>.</p>
+<p>Using a dictionary provides a flexible and interoperable data structure, where column names are used as keys and the associated values correspond to the retrieved ODB rows. This approach ensures seamless compatibility with modern Python scientific libraries such as <strong>pandas</strong> and <strong>xarray</strong>.</p>
+<p>As a result, the retrieved data can be easily converted into a <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> for further analysis and processing.</p>
+<p>This enables users to perform:
+- Statistical analysis
+- Data filtering and aggregation
+- Visualization
+- Export to common formats (ODB2, NetCDF…)
+- Integration into operational or research workflows</p>
+<p>Example:
+Let’s consider the code above by considering all the observation types.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#-*- coding: utf-8 -*-</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pands</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="o">...</span>
+
+<span class="c1"># Execute SQL query</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">odbDict</span><span class="p">(</span><span class="n">dbpath</span><span class="p">,</span> <span class="n">sql_query</span><span class="p">)</span>
+
+<span class="c1"># Convert to pandas DataFrame</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Output :</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="c1">##################################################] Complete 100%  (Total: 57484 rows)</span>
+<span class="n">idx</span>     <span class="n">statid</span><span class="nd">@hdr</span>  <span class="n">obstype</span><span class="nd">@hdr</span>  <span class="n">varno</span><span class="nd">@body</span>  <span class="n">degrees</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>  <span class="n">degrees</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>  <span class="n">obsvalue</span><span class="nd">@body</span>
+<span class="mi">0</span>          <span class="mi">26268</span>            <span class="mi">1</span>           <span class="mi">1</span>     <span class="mf">57.816700</span>     <span class="mf">29.950000</span>       <span class="mf">0.000000</span>
+<span class="mi">1</span>          <span class="mi">26268</span>            <span class="mi">1</span>          <span class="mi">39</span>     <span class="mf">57.816700</span>     <span class="mf">29.950000</span>     <span class="mf">276.200000</span>
+<span class="mi">2</span>          <span class="mi">26268</span>            <span class="mi">1</span>          <span class="mi">58</span>     <span class="mf">57.816700</span>     <span class="mf">29.950000</span>       <span class="mf">0.940000</span>
+<span class="mi">3</span>          <span class="mi">26268</span>            <span class="mi">1</span>           <span class="mi">7</span>     <span class="mf">57.816700</span>     <span class="mf">29.950000</span>       <span class="mf">0.004482</span>
+<span class="mi">4</span>          <span class="mi">26067</span>            <span class="mi">1</span>           <span class="mi">1</span>     <span class="mf">59.433300</span>     <span class="mf">29.500000</span>       <span class="mf">0.000000</span>
+<span class="o">...</span>          <span class="o">...</span>          <span class="o">...</span>         <span class="o">...</span>           <span class="o">...</span>           <span class="o">...</span>            <span class="o">...</span>
+<span class="mi">57479</span>      <span class="n">sekrn</span>           <span class="mi">13</span>          <span class="mi">29</span>     <span class="mf">68.494515</span>     <span class="mf">21.575417</span>       <span class="mf">1.056382</span>
+<span class="mi">57480</span>      <span class="n">sekrn</span>           <span class="mi">13</span>         <span class="mi">192</span>     <span class="mf">68.494515</span>     <span class="mf">21.575417</span>    <span class="o">-</span><span class="mf">327.669993</span>
+<span class="mi">57481</span>      <span class="n">sekrn</span>           <span class="mi">13</span>          <span class="mi">29</span>     <span class="mf">68.494515</span>     <span class="mf">21.575417</span>       <span class="mf">1.034856</span>
+<span class="mi">57482</span>      <span class="n">sekrn</span>           <span class="mi">13</span>         <span class="mi">192</span>     <span class="mf">68.494515</span>     <span class="mf">21.575417</span>    <span class="o">-</span><span class="mf">327.669993</span>
+<span class="mi">57483</span>      <span class="n">sekrn</span>           <span class="mi">13</span>          <span class="mi">29</span>     <span class="mf">68.494515</span>     <span class="mf">21.575417</span>       <span class="mf">0.922010</span>
+
+<span class="p">[</span><span class="mi">57484</span> <span class="n">rows</span> <span class="n">x</span> <span class="mi">6</span> <span class="n">columns</span><span class="p">]</span>
+</pre></div>
+</div>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Dependencies.html" class="btn btn-neutral float-left" title="Dependencies" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2025, Idir Dehmous.</p>
+    <p>&#169; Copyright 2025, I.Dehmous.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -28,12 +28,9 @@ pip install odb4py
 ```
 
 ## Installation test 
-`from odb4py import core  # The C extension module name` <br>
+`from odb4py import core  # The C extension` <br>
 `from odb4py import utils # The pure python modules ` 
 
-## Installation 
-The odb4py package can be installed from PyPi using pip command: <br/>
-`pip install odb4py`
 
 
 ## Requirements

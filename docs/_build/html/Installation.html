@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Installation &mdash; odb4py 1.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
@@ -19,7 +19,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Dependencies" href="Dependencies.html" />
+    <link rel="next" title="Usage" href="Usage.html" />
     <link rel="prev" title="Introduction" href="Introduction.html" /> 
 </head>
 
@@ -45,8 +45,10 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Introduction.html">Introduction</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Dependencies.html">Dependencies</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="Usage.html">Usage</a></li>
 </ul>
 
@@ -76,37 +78,24 @@
              
   <section id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h1>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Clone<span class="w"> </span>the<span class="w"> </span><span class="nb">source</span><span class="w"> </span>code<span class="w"> </span>from<span class="w"> </span>github<span class="w"> </span>repository:
-<span class="w">    </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/idirdehmous/odb4py_1.1.0
-
-
-The<span class="w"> </span>second<span class="w"> </span>step<span class="w"> </span>consists<span class="w"> </span><span class="k">in</span><span class="w"> </span>the<span class="w"> </span>build<span class="w"> </span>and<span class="w"> </span>installation<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>ODB<span class="w"> </span>library.
-
-<span class="w">    </span>mkdir<span class="w"> </span>-p<span class="w"> </span>build_odb
-<span class="w">    </span><span class="nb">cd</span><span class="w"> </span>build_odb
-
-
-<span class="w">    </span><span class="nv">ODB_HOME</span><span class="o">=</span>/path/to/../../odb/install/dir
-
-<span class="w">    </span>The<span class="w"> </span>main<span class="w"> </span>CMakefiles.txt<span class="w"> </span>is<span class="w"> </span>inide<span class="w"> </span>the<span class="w"> </span>python<span class="w"> </span>package.<span class="w"> </span>It<span class="w"> </span>compiles<span class="w"> </span>the<span class="w"> </span>odb<span class="w"> </span>libraries,binaries<span class="w"> </span>and<span class="w"> </span>copies<span class="w"> </span>the<span class="w"> </span>necessary<span class="w"> </span>include<span class="w"> </span>files.
-
-<span class="w">    </span>cmake<span class="w"> </span>-DCMAKE_INSTALL_PREFIX<span class="o">=</span><span class="si">${</span><span class="nv">ODB_HOME</span><span class="si">}</span><span class="w"> </span>/path/to/../../odb4py_1.1.0
-<span class="w">    </span>make<span class="w"> </span>-j<span class="w"> </span>ncpu<span class="w">    </span><span class="c1"># Set npcu according to your machine ,  2,4, etc</span>
-<span class="w">    </span>make<span class="w"> </span>install
-
-
-Once<span class="w"> </span>the<span class="w"> </span>ODB<span class="w"> </span>is<span class="w"> </span>built<span class="w"> </span>and<span class="w"> </span>installed,<span class="w"> </span>the<span class="w"> </span>following<span class="w"> </span>envirnement<span class="w"> </span>variables<span class="w"> </span>have<span class="w"> </span>to<span class="w"> </span>be<span class="w"> </span>added<span class="w"> </span>into<span class="w"> </span>the<span class="w"> </span>.bashrc<span class="w"> </span>file
-
-
-<span class="w">    </span><span class="nb">export</span><span class="w"> </span><span class="nv">ODB_INSTALL_DIR</span><span class="o">=</span>/path/to/../odb/install/dir<span class="w">         </span><span class="c1"># To automatically load the libodb.so when any C/python function is invoked</span>
-<span class="w">    </span><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="si">${</span><span class="nv">PATH</span><span class="si">}</span>:/path/to/../../odb/install/dir/bin<span class="w">     </span><span class="c1"># Contains the odb98.x, dcagen that run in background to parse the SQL statement and fetch the data.</span>
-<span class="w">    </span><span class="nb">export</span><span class="w"> </span><span class="nv">LD_LIBRARY_PATH</span><span class="o">=</span><span class="si">${</span><span class="nv">LD_LIBRARY_PATH</span><span class="si">}</span>:/path/to/../../odb/install/dir/lib
+<p>The odb4py package can be installed from PyPi using the pip command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>odb4py
 </pre></div>
 </div>
+<section id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>3.9   &lt;=  python  &lt;= 3.13</p></li>
+<li><p>numpy &gt;= 2.x.x</p></li>
+<li><p>pandas&gt;= 2.x.x</p></li>
+</ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The odb directory contained inside the package is not the same as the one provided by the odb_bundle of ECMWF. The user has to careful and make sure that the python scripts are using the libodb*.so and the binaries compiled inside the odb4py package directory.</p>
+<p>The <cite>odb</cite> directory included within this package is not identical to the
+official ODB distribution provided in the ECMWF ODB bundle (version 0.18.1).
+For some consistency and optimality reasons with <a class="reference external" href="https://docs.python.org/3/c-api/index.html">C/Python API</a> the original C routines and/or headers have been modified and/or removed.</p>
 </div>
+</section>
 </section>
 
 
@@ -114,13 +103,13 @@ Once<span class="w"> </span>the<span class="w"> </span>ODB<span class="w"> </spa
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Introduction.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Dependencies.html" class="btn btn-neutral float-right" title="Dependencies" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Usage.html" class="btn btn-neutral float-right" title="Usage" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2025, Idir Dehmous.</p>
+    <p>&#169; Copyright 2025, I.Dehmous.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Introduction &mdash; odb4py 1.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
@@ -46,6 +46,10 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Usage.html#open-a-ccma-database">Open a CCMA database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Usage.html#create-the-dca-direct-column-access-files">Create the DCA (Direct Column Access) files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Usage.html#send-and-fetch-data-from-a-given-ecma-or-ccma">Send and fetch data from a given ECMA or CCMA</a></li>
 </ul>
 
         </div>
@@ -74,16 +78,17 @@
              
   <section id="introduction">
 <h1>Introduction<a class="headerlink" href="#introduction" title="Link to this heading"></a></h1>
-<p>This is the version 1.1.0 of odb4py.
-An interface written in C/Python API to access the ECMWF ODB1 databases.</p>
-<p>Its aim is to access the ODB tables/columns data and meta data using a direct SQL request
-embadded in python scripts.</p>
-<p>The main source code is written in pure C and the routines handling the ODB1
-format has been ‘pruned’ from ECMWF ODB_API bundle-0.18.1 to build only the
-needed libraries</p>
-<p>Reference:
-The original C code has been developed by “Sami Saarinen et al” at ECMWF from 1998 –&gt; 2008.
-Some modifictions have been done to make it compatible with C/Python API ( 3.8 —&gt; 3.12 ).</p>
+<p><strong>odb4py</strong> is a C/Python interface designed to access ECMWF ODB1 databases.
+It provides direct access to ODB tables, columns, data, and metadata
+through SQL queries embedded in Python scripts.</p>
+<p>The core of the project is implemented in pure C for performance and
+reliability. The routines handling the ODB1 format have been derived and
+pruned from the ECMWF ODB_API bundle <a class="reference external" href="https://www.ecmwf.int/sites/default/files/elibrary/2013/13861-using-odb-ecmwf.pdf">version 0.18.1</a>.
+necessary components required to build the runtime libraries used by
+odb4py.</p>
+<p>The package is distributed as manylinux wheels and embeds the required
+ODB runtime libraries, allowing installation via pip without requiring
+an external ECMWF ODB installation.</p>
 </section>
 
 
@@ -97,7 +102,7 @@ Some modifictions have been done to make it compatible with C/Python API ( 3.8 �
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2025, Idir Dehmous.</p>
+    <p>&#169; Copyright 2025, I.Dehmous.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

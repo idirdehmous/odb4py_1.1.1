@@ -315,6 +315,7 @@ static PUBLIC PyObject *odbClose_method(PyObject *Py_UNUSED(self), PyObject *arg
         PyErr_SetString(PyExc_ValueError, "--odb4py : odbClose(handle): expected integer handle.");
         return NULL;
     }
+
     if (free_handles && handle >= 1 && handle <= maxhandle) {
         DB_t *ph = &free_handles[handle - 1];
         if (ph->h == handle) {
@@ -329,14 +330,11 @@ static PUBLIC PyObject *odbClose_method(PyObject *Py_UNUSED(self), PyObject *arg
             }
             ph->tblname = NULL;
 	    printf("--odb4py : database closed !. \n" );
-            return PyLong_FromLong(1);
+            return PyLong_FromLong(0);
         }
-    }
-    // The handle is already free 
-    if (!handle) {
+    } else {
 
-    printf("%s\n", "--odb4py : database closed !") ;
-    return PyLong_FromLong(1); 
-    }
-    return NULL ; 
+    return PyLong_FromLong(-1); 
+
+}
 }
