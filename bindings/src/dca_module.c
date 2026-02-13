@@ -68,14 +68,14 @@ static PyObject *odbDca_method( PyObject* Py_UNUSED(self) , PyObject *args , PyO
     char* dca_cpu    = concat( dca_db     ,  ncpu_arg  );
     //char* dca_verb   = concat(dca_cpu     ,  quiet    ) ; 
 
-    printf ( "%s\n"  , "--odb4py : Creating DCA files ..." ) ; 
+    printf ( "%s"  , "--odb4py : Creating DCA files ..." ) ; 
 
     int status= system ( dca_cpu ) ; 
     if ( status != 0){  
     printf("%s  %s\n" , dca_cpu, " Failed to run dcagen : command returned a non Zero value,  !" ) ;
-    return PyLong_FromLong( 1 ) ;
+    return PyLong_FromLong( -1	) ;
     }else {
-    printf("%s\n" ,"odb4py : ...done !" ) ; 
+    printf("%s\n" ,"  done !" ) ; 
     free(dca_path) ; 
     free(cma_path) ;
     free(dca_cmd ) ;
