@@ -8,7 +8,7 @@ Usage
 
 .. note::
    In the following examples, a CCMA ODB database is used.
-   However, the same code is fully applicable to an ECMA database.
+   However, the same code is fully applicable to an ECMA.<obstype> database  where obstype can be : synop, radar, amdar iasi etc.
 
 
 Opening a CCMA Database
@@ -44,8 +44,8 @@ value if it fails.
        sys.exit(1)
 
 
-Creating DCA (Direct Column Access) Files
-------------------------------------------
+Creating DCA Files (Direct Column Access)
+-----------------------------------------
 
 In order to retrieve rows and columns efficiently, ODB relies on
 **DCA (Direct Column Access)** files.
@@ -199,7 +199,7 @@ Output :
     'degrees(lon)':[1.15, 1.12, 1.14,....] , 
     'obsvalue@body':[216.00144, 28.72984, -2.00899 ]}
    
-
+   Runtime duration : 0:00:01.02
 
 
 Data Structure and Integration with the Python Ecosystem
@@ -212,20 +212,23 @@ Using a dictionary provides a flexible and interoperable data structure, where c
 As a result, the retrieved data can be easily converted into a ``pandas.DataFrame`` for further analysis and processing.
 
 This enables users to perform:
-- Statistical analysis
-- Data filtering and aggregation
-- Visualization
-- Export to common formats (ODB2, NetCDF...)
-- Integration into operational or research workflows
+ - Statistical analysis
+ - Data filtering and aggregation
+ - Visualization
+ - Export to common formats (ODB2, NetCDF...)
+ - Integration into operational or research workflows
 
 Example:
-Let's consider the code above by considering all the observation types.
+Let's consider the code above by selecting all the observation types.
 
 .. code-block:: python
    
    #-*- coding: utf-8 -*-
-   import pands as pd  
+   import pandas as pd  
    ...
+
+   # SQL request 
+   sql_query ="SELECT statid , obstype, varno, degrees(lat) ,  degrees(lon) , obsvalue   FROM  hdr, body"
 
    # Execute SQL query
    data = odbDict(dbpath, sql_query)
@@ -255,6 +258,7 @@ Output :
 
    [57484 rows x 6 columns]
 
+   Runtime duration : 0:00:01.96
 
 
  
