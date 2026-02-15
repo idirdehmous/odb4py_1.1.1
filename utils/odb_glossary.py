@@ -124,7 +124,6 @@ class OdbLexic:
 
 
     def odbCols (self):
-
         dict_cols={"desc":["expver","class","stream","type",
                            "andate","antime","inidate","initime",
                            "creadate","creatime","creaby","moddate",
@@ -177,6 +176,7 @@ class OdbLexic:
         return dict_cols
 
 
+
     def odbPkind (self):
         list_ckind=["string",
                    "pk1int",
@@ -214,7 +214,7 @@ class OdbLexic:
 
     def sqlPrepInsert( self,  query=None ): 
         """
-        Takes an CMA sql statement and convert it to 
+        Takes a CMA sql statement and convert it to 
         an sqlite3 statement for value insertion 
         """
 
