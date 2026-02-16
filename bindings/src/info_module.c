@@ -246,6 +246,7 @@ return PyLong_FromLong(0) ;
 
 
 
+
 static PyObject* odbFunctions_method(PyObject* Py_UNUSED(self))
 {
 char *cap_funcs[]={ 
@@ -254,15 +255,18 @@ char *cap_funcs[]={
 "k2c", "c2k", "c2f", "f2c", "k2f", "f2k", "rad", "distance", "dist", "km", "pow", "circle", "lon0to360", "ibits",
 "aYear", "aMonth", "aDay", "anHour", "aMinute", "aSecond"} ;
 
+
 /* Wind speed (ff), direction (dd), u- and v-components */
 char *ws_funcs[]={"Speed", "uv2ff", "ff"   , "Dir" , "dd"  , "Ucom", "ucomp", "Vcom", "vcomp"};
+
 
 /*Aliases */
 char *agg_cap_funcs[]= {"Within", "Within360", "llu2", "Min",
 "Max", "Density", "Count", "Bcount", "Sum", "Avg", "Median", "Stdev", "Var", "Rms", "Dotp", "Norm", "Count_distinct",
 "Bcount_distinct", "Sum_distinct", "Avg_distinct", "Median_distinct", "Stdev_distinct", "Var_distinct", "Rms_distinct",
 "Dotp_distinct", "Norm_distinct", "Shared2ArgFunc", "Covar", "Corr", "Linregr_a", "Linregr_b", "Maxloc", "Minloc" };
-  
+
+
 /* Compile-time evaluable functions */
 char *ct_funcs[] ={"sin"     ,  "cos"     ,  "tan"      ,  "cot"      , "asin"    ,   "acos"     ,  "atan"     , "atan2"  ,   "acot",
   "acot2"   ,  "sinh"    ,  "cosh"     ,  "tanh"     , "coth"    ,   "asinh"    ,  "acosh"    , "atanh"  ,   "acoth"   ,   
@@ -274,8 +278,8 @@ char *ct_funcs[] ={"sin"     ,  "cos"     ,  "tan"      ,  "cot"      , "asin"  
   "month"   ,  "day"     ,  "hour"     ,  "hours"    , "minutes"  ,  "minute"   ,  "seconds"  , "second" ,    
   "pi"      ,  "speed"   ,  "uv2ff"    ,  "ff"       , "dir"      ,  "uv2dd"    ,  "dd"       , "u"      ,   "ucomp"   ,"ucom","v"        ,  "vcomp","vcom","within","within","tstamp", "basetime"};
 
-  /* Aggregate functions (prepended with underscore when with FUNCS_C) */
 
+  /* Aggregate functions (prepended with underscore when with FUNCS_C) */
 char *agg_funcs[]={"density" , "count"  , "bcount" , "sum" , "avg" , "median" , "stdev", "var", "rms", "dotp",
   "norm"    , "count_distinct"    , "bcount_distinct", "sum_distinct"   , "avg_distinct", "median_distinct", 
   "stdev_distinct"      , "var_distinct"  , "rms_distinct"    , "dotp_distinct", "norm_distinct","covar",
@@ -300,7 +304,6 @@ return PyLong_FromLong(0) ;
 }
 
 /*static PyObject* odbSchema_method (  ){
-
 //      1  desc
 //      2  +---> poolmask
 //      3  +---> timeslot_index
