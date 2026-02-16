@@ -1,4 +1,4 @@
 sphinx
-sphinx_rtd_theme
-Cython
+sphinx-rtd-theme
+myst-parser
 numpy 
