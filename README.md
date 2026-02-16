@@ -1,3 +1,7 @@
+[![PyPI version](https://img.shields.io/pypi/v/odb4py.svg)](https://pypi.org/project/odb4py/)
+[![Documentation Status](https://readthedocs.org/projects/odb4py/badge/?version=latest)](https://odb4py.readthedocs.io)
+![Python](https://img.shields.io/pypi/pyversions/odb4py)
+
 # odb4py 1.1.0 release
 
 ## Description
@@ -59,6 +63,4 @@ This project incorporates and is derived from the ECMWF ODB software. <br/>
 ODB was developed at the European Centre for Medium-Range Weather Forecasts (ECMWF)
 by [S. Saarinen et al](https://www.ecmwf.int/sites/default/files/elibrary/2004/76278-ifs-documentation-cy36r1-part-i-observation-processing_1.pdf). All rights to the original ODB software remain with ECMWF
 and their respective owners.
-
-[![Documentation Status](https://readthedocs.org/projects/odb4py/badge/?version=latest)](https://odb4py.readthedocs.io/en/latest/?badge=latest)
 
