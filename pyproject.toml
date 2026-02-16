@@ -37,7 +37,8 @@ classifiers = [
 [project.urls]
 Homepage      = "https://github.com/idirdehmous/odb4py_1.1.0"
 Source        = "https://github.com/idirdehmous/odb4py_1.1.0"
-Documentation = "https://github.com/idirdehmous/odb4py/blob/main/README.md"
+Documentation = "https://odb4py.readthedocs.io"
+
 
 [build-system]
 requires = [
