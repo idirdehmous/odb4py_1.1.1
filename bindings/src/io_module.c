@@ -29,11 +29,11 @@ ODBc_get_free_handles(int *Maxhandle)
 
 // OPEN ODB  AND GET ODB handler !
 static PUBLIC   PyObject*   odbConnect_method ( PyObject *Py_UNUSED(self) , PyObject* args ,  PyObject *kwargs)  {
-	char *dbname =NULL  ; 
-        char *mode   =NULL  ;
-        int  *npools =NULL  ;
-        int  *ntables=NULL  ; 
-        char *poolmask=NULL ;
+	char *dbname  =NULL  ; 
+        char *mode    =NULL  ;
+        char *poolmask=NULL  ;
+	int  *npools  =0     ;
+	int  *ntables =0     ; 
  
         if(dbname  ) FREE(dbname)   ;
         if(mode    ) FREE(mode)     ;
@@ -44,9 +44,9 @@ static PUBLIC   PyObject*   odbConnect_method ( PyObject *Py_UNUSED(self) , PyOb
         PyObject *verbose  =NULL  ; 
         Bool      lverb    =false   ; 
 	
-	static char *kwlist[] = {"odbdir" , "verbose", "npools"};
+	static char *kwlist[] = {"odbdir" , "verbose", "npools", NULL };
        if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s|Oi",      // dbpath is required , verbose and npools are optional 
-                  			    kwlist,
+                  			    kwlist ,
                                             &dbname ,
                                             &verbose, 
 					    &npools 
@@ -92,6 +92,7 @@ static PUBLIC   PyObject*   odbConnect_method ( PyObject *Py_UNUSED(self) , PyOb
       putenv(env);
       first_time = true;
     }
+
     for ( j=0; j  <maxhandle  ; j++) {
       if (free_handles[j].h == 0) {
 	handle = j+1;
@@ -100,6 +101,7 @@ static PUBLIC   PyObject*   odbConnect_method ( PyObject *Py_UNUSED(self) , PyOb
       }
     }
 
+
     if (!ph) {
       fprintf(stderr, "--odb4py : Unable to open ODB '%s': too many open databases (max=%d).\n",
                 dbname , maxhandle);
@@ -107,8 +109,9 @@ static PUBLIC   PyObject*   odbConnect_method ( PyObject *Py_UNUSED(self) , PyOb
               "\tMax. no. of open databases currently = %d. Increase via export ODB_MAXHANDLE\n",
               maxhandle);
       handle = -1;
-      Py_RETURN_NONE;
+      return PyLong_FromLong(-1);
     }
+
 
     { /* Check if database name contains an '/' */
       char *pdot   = NULL;
@@ -152,6 +155,7 @@ static PUBLIC   PyObject*   odbConnect_method ( PyObject *Py_UNUSED(self) , PyOb
 	  char *db  = NULL;
 
 	  slash     = strrchr(tmp, '/');
+
 	  if (slash) {
 	    db = STRDUP(slash+1);
 	  }
@@ -189,6 +193,7 @@ static PUBLIC   PyObject*   odbConnect_method ( PyObject *Py_UNUSED(self) , PyOb
       }
       FREE(p);
     }
+
     ph->h      = handle;
     ph->dbname = p_dbname;
     SET_PATH(srcpath  , SRCPATH ,  NULL);
@@ -217,6 +222,7 @@ static PUBLIC   PyObject*   odbConnect_method ( PyObject *Py_UNUSED(self) , PyOb
       }  //if (first_time) 
 
 
+
     if (poolmask) { /* Set poolmask explicitly for this database */
       char        *env = NULL;
       const char str[] = "ODB_PERMANENT_POOLMASK";
@@ -232,11 +238,12 @@ static PUBLIC   PyObject*   odbConnect_method ( PyObject *Py_UNUSED(self) , PyOb
       /* FREE(env); (cannot be freed due to putenv()) */ 
     } /* if (poolmask) */
 
+    // Open a given table 
     ph->tblname = NULL;
     { /* Read primary metadata (i.e. usually the $ODB_SRCPATH_<dbname>/<dbname>.dd -file) */
       int iret = 0;
       int iounit = -1;
-      cma_open_(&iounit, p_dbname , "r", &iret, strlen(p_dbname), 1);
+      cma_open_ (&iounit, p_dbname , "r", &iret, strlen(p_dbname), 1);
       if (iret < 1) {
         fprintf(stderr, BRED "--odb4py : Could not open ODB '%s' (iret=%d)\n" reset,
                 srcpath_dbname , iret);
@@ -248,38 +255,6 @@ static PUBLIC   PyObject*   odbConnect_method ( PyObject *Py_UNUSED(self) , PyOb
 	}
 
        }
-      // don't need meta data 
-      /*if (iret >= 1) {
-	FILE *fp = CMA_get_fp(&iounit);
-	codb_read_metadata_(&handle,
-			    &iounit,
-			    &Npools,
-			    NULL,
-			    NULL,
-			    NULL,
-			    NULL,
-			    NULL,
-			    &Ntables);
-	if (fp && Ntables > 0) {
-	  int i;
-	  char tname[4096];
-	  CALLOC(ph->tblname, Ntables);
-	  for (i=0; i<Ntables; i++) {
-	    int id, fsize;
-	    Bool found = false;
-	    if (fscanf(fp,"%d %s %d",&id,tname,&fsize) == 3) {
-	      char *ptbl = tname;
-	       if (*ptbl == '@') ptbl++; 
-	      if (id >= 1 && id <= Ntables) {
-		ph->tblname[id-1] = STRDUP(ptbl);
-		found = true;
-	      }
-	    }
-	    if (!found) ph->tblname[i] = STRDUP("???unknown_table???");
-	  } // for (i=0; i<Ntables; i++) 
-	}
-      }*/
-
   
        // close unit  
       cma_close_(&iounit, &iret);
@@ -294,12 +269,12 @@ static PUBLIC   PyObject*   odbConnect_method ( PyObject *Py_UNUSED(self) , PyOb
     if (ntables) *ntables = Ntables;
   }
 
-   // if error   (failed ) return -1 else return 0 
+  // if error  (failed ) return -1 else return 0 
   if (error && handle >= 1) {
         ODBc_close(handle);
         return PyLong_FromLong(-1);
     } else 
-   // if success return the handler 
+   // if success return  0
     return PyLong_FromLong(0); 
 }
 
@@ -307,34 +282,62 @@ static PUBLIC   PyObject*   odbConnect_method ( PyObject *Py_UNUSED(self) , PyOb
 
 
 
-// CLOSE THE ODB 
-static PUBLIC PyObject *odbClose_method(PyObject *Py_UNUSED(self), PyObject *args)
+// Close the ODB 
+static PUBLIC PyObject* odbClose_method(PyObject *Py_UNUSED(self), PyObject *args)
 {
-    int handle = 0;
+    int handle;
+
+    // handle mandatory 
     if (!PyArg_ParseTuple(args, "i", &handle)) {
-        PyErr_SetString(PyExc_ValueError, "--odb4py : odbClose(handle): expected integer handle.");
+        PyErr_SetString(PyExc_ValueError,
+            "--odb4py : odbClose(handle) expects an integer handle.");
         return NULL;
     }
 
-    if (free_handles && handle >= 1 && handle <= maxhandle) {
-        DB_t *ph = &free_handles[handle - 1];
-        if (ph->h == handle) {
-            DCA_free(handle);
-            codb_end_poolmask_(&handle);
-            ph->h = 0;
-            FREE(ph->srcpath);
-            FREE(ph->datapath);
-            if (ph->tblname && ph->ntables > 0) {
-                for (unsigned int i = 0; i < (unsigned int)ph->ntables; i++) FREE(ph->tblname[i]);
-                FREE(ph->tblname);
-            }
-            ph->tblname = NULL;
-	    printf("--odb4py : database closed !. \n" );
-            return PyLong_FromLong(0);
-        }
-    } else {
+    if (!free_handles || handle < 1 || handle > maxhandle) {
+        fprintf(stderr,
+            "--odb4py : invalid handle %d\n", handle);
+        return PyLong_FromLong(-1);
+    }
 
-    return PyLong_FromLong(-1); 
+    DB_t *ph = &free_handles[handle - 1];
 
-}
+    // already closed or invalid 
+    if (ph->h != handle) {
+        fprintf(stderr,
+            "--odb4py : handle %d not active\n", handle);
+        return PyLong_FromLong(-1);
+    }
+
+    //
+    DCA_free(handle);
+    codb_end_poolmask_(&handle);
+
+    // Free allocated memory 
+
+    FREE(ph->srcpath);
+    FREE(ph->datapath);
+    FREE(ph->idxpath);
+    FREE(ph->dbname);
+
+    if (ph->tblname && ph->ntables > 0) {
+        for (int i = 0; i < ph->ntables; ++i)
+            FREE(ph->tblname[i]);
+
+        FREE(ph->tblname);
+    }
+
+    // ---- reset structure 
+    ph->srcpath  = NULL;
+    ph->datapath = NULL;
+    ph->idxpath  = NULL;
+    ph->dbname   = NULL;
+    ph->tblname  = NULL;
+    ph->ntables  = 0;
+    ph->npools   = 0;
+    ph->h        = 0;
+
+    fprintf(stderr, "--odb4py : database closed.\n");
+
+    return PyLong_FromLong(0);
 }
