@@ -1,86 +1,216 @@
 #define PY_SSIZE_T_CLEAN
-#include <ctype.h>
-#include <math.h>
+#include <Python.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <Python.h>
-#include "magicwords.h"
-#include "info.h"
-#include "odb.h"
-#include "privpub.h"
-#include "macros.h"
+#include <dirent.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <time.h>
 
 
-/* ENDIANESS */
-extern int ec_is_little_endian();
 
-static PyObject *odbDca_method( PyObject* Py_UNUSED(self) , PyObject *args , PyObject*  kwargs ) {
-    char *path     = NULL ; 
-    char *database = NULL ;
-    int   ncpu   = 1  ; 
-    char *dbname =NULL; 
-    
 
-    static char *kwlist[] = {"dbpath","db","ncpu"};
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s|si", kwlist, &path , &database , &ncpu))
-    {
-        return NULL;
+// Check file exists
+/*static int  file_exists(  const char *path ) {
+struct stat st  ;   
+return ( stat( path , &st ) ==  0 && S_ISREG(st.st_mode))  ;
+}*/
+
+
+// Check dir exists 
+static int dir_exists(const char *path)
+{
+    struct stat st;
+    return (stat(path, &st) == 0 && S_ISDIR(st.st_mode));
+}
+
+
+
+// Path  validity 
+static int valid_odb_path(const char *path)
+{
+    struct stat st;
+    char tmp[4096];
+
+    /* direct directory */
+    if (stat(path,&st)==0 && S_ISDIR(st.st_mode))
+        return 1;
+
+    /* try ECMA */
+    snprintf(tmp,sizeof(tmp),"%s/ECMA",path);
+    if (stat(tmp,&st)==0 && S_ISDIR(st.st_mode))
+        return 1;
+
+    /* try CCMA */
+    snprintf(tmp,sizeof(tmp),"%s/CCMA",path);
+    if (stat(tmp,&st)==0 && S_ISDIR(st.st_mode))
+        return 1;
+
+    return 0;
+}
+
+
+/*static int dca_files_exist(const char *dbpath       ,
+                           PyObject   *tables       ,
+                           char       *missing_table,
+                           size_t      missing_size )
+{
+    if (!tables || !PySequence_Check(tables))
+        return  -1 ; 
+    Py_ssize_t n = PySequence_Size(tables);
+    char filepath[4096]; 
+    for (Py_ssize_t i = 0; i < n; ++i) {
+        PyObject *item = PySequence_GetItem(tables, i); // New py ref 
+        if (!item)
+            return -1;
+        const char *tname = PyUnicode_AsUTF8(item);
+        if (!tname) {
+            Py_DECREF(item);
+            return -1;
+        }
+	// Path to   dca/<table_name>.dca 
+        snprintf(filepath, sizeof(filepath),"%s/dca/%s.dca", dbpath, tname);
+        if (!file_exists(filepath)) {
+             copy missing table name 
+            snprintf(missing_table, missing_size, "%s", tname);
+            Py_DECREF(item);
+            return -1;   
+        }
+        Py_DECREF(item);
     }
-
-   database=path  ; 
- 
-   char * dcagen_path ; 
-   char * febin  ;  
-   char * sysbin ;
-   
-   febin      =getenv( "ODB_FEBINPATH" )  ;
-   sysbin     =getenv( "ODB_SYSPATH"  )   ;
-   dcagen_path=getenv( "ODB_BEBINPATH" )  ; 
+    return 0; 
+}*/
 
 
-    putenv(febin);
-    putenv(sysbin);
-    putenv(dcagen_path);
-    
-    char scpu[5];
-    strtonum(scpu, ncpu);
-    char* dbname_arg ;
-    char* ncpu_arg ; 
-    if (dbname) { dbname_arg = concat ( " -l " , dbname   ); 
-        } 
-    else 
-    { dbname_arg=" " ;  
-        };
-    if (ncpu  ) { ncpu_arg   = concat ( " -N " , scpu     ); 
-    } else 
-    { 
-     ncpu_arg  =" " ;  
+
+
+// odbDca Python method      
+static PyObject * odbDca_method(PyObject *Py_UNUSED(self), PyObject *args, PyObject *kwargs)
+{
+    const char *dbpath = NULL;
+    const char *dbtype = NULL;
+    const char *extra  = NULL;
+    PyObject *tables = NULL;
+    int ncpu = 1;
+
+    static char *kwlist[] = {
+        "odbdir",
+        "dbtype",
+        "tables",
+        "ncpu"  , 
+        "extra_args",
+         NULL
     };
 
-    //if (verb  ) {  quiet = " -q "; } else { quiet =" " ;  };
-
-    char* dca_path   = concat(dcagen_path , "/dcagen ");
-    char* cma_path   = concat( " -i "     ,  database );
-    char* dca_cmd    = concat(dca_path    ,  cma_path) ;
-    char* dca_args   = concat(dca_cmd     ,  " -F -n -q -z -b -P " ) ; 
-
-    char* dca_db     = concat( dca_args   ,  dbname_arg );
-    char* dca_cpu    = concat( dca_db     ,  ncpu_arg  );
-    //char* dca_verb   = concat(dca_cpu     ,  quiet    ) ; 
-
-    printf ( "%s"  , "--odb4py : Creating DCA files ..." ) ; 
-
-    int status= system ( dca_cpu ) ; 
-    if ( status != 0){  
-    printf("%s  %s\n" , dca_cpu, " Failed to run dcagen : command returned a non Zero value,  !" ) ;
-    return PyLong_FromLong( -1	) ;
-    }else {
-    printf("%s\n" ,"  done !" ) ; 
-    free(dca_path) ; 
-    free(cma_path) ;
-    free(dca_cmd ) ;
-    free(dca_args) ;      // deallocate the string  cmd 
+    // Check args  
+    if (!PyArg_ParseTupleAndKeywords( args, kwargs, "ss|Ois", kwlist ,
+                                                             &dbpath ,
+                                                             &dbtype ,
+							     &tables ,
+                                                             &ncpu,
+                                                             &extra))
+    {
+        return PyLong_FromLong(-1);
     }
 
-    return PyLong_FromLong( 0 ) ; 
+
+
+    // Check odb path 
+    if (!valid_odb_path(dbpath)) {
+    fprintf(stderr,
+        "--odb4py : invalid ODB directory: %s\n", dbpath);
+       return PyLong_FromLong(-1);
+     }
+
+  
+    // Set number of  CPUs   ( if negative value or not using all system  ressource  , take  _SC_NPROCESSORS_ONLN) 
+    if (ncpu < 0   ||  ncpu < sysconf(_SC_NPROCESSORS_ONLN)) { 
+      ncpu  =  _SC_NPROCESSORS_ONLN ; 
+    }   
+
+    // dca path  
+    char dca_dir[4096];
+    snprintf(dca_dir, sizeof(dca_dir), "%s/dca", dbpath);
+
+    // Locate dcagen from env 
+    const char *bebin = getenv("ODB_BEBINPATH");
+
+    // Check path  
+    if (!bebin) {
+            fprintf(stderr,
+                    "--odb4py : ODB_BEBINPATH not defined\n");
+            return PyLong_FromLong(-1);
+      }
+
+
+    // Build dcagen command                               
+    char cmd  [4096]  ;
+    char cpu_str[32]  ;
+
+    // Concat  
+    snprintf(cpu_str, sizeof(cpu_str), "%d", ncpu);
+    snprintf(cmd, sizeof(cmd), "%s/dcagen -i '%s' -N %s -q -z -P", bebin, dbpath, cpu_str);
+
+
+    if (extra && strlen(extra) > 0) {
+        strncat(cmd, " ", sizeof(cmd)-strlen(cmd)-1);
+        strncat(cmd, extra, sizeof(cmd)-strlen(cmd)-1);
+    }
+
+
+if (tables && !PySequence_Check(tables)) {
+    PyErr_SetString(PyExc_TypeError,
+        "--odb4py : tables must be a list or tuple of table names seperated by -t .         \n`see the dcagen script documentation`");
+     return PyLong_FromLong(-1);
 }
+
+// Create dca files only for the table found in the pool (ONLY !) 
+// It processes some tables instead of  386 ones  !!
+if ( tables &&  PySequence_Check(tables)) {
+    Py_ssize_t n = PyList_Size(tables);
+    for (Py_ssize_t i = 0; i < n; ++i) {
+        PyObject *item = PyList_GetItem(tables, i); // borrowed ref
+        if (!PyUnicode_Check(item))
+            continue;
+
+        const char *tname = PyUnicode_AsUTF8(item);
+        strncat(cmd, " -t ", sizeof(cmd)-strlen(cmd)-1);
+        strncat(cmd, tname , sizeof(cmd)-strlen(cmd)-1);
+    }
+}
+
+   
+    printf("--odb4py : Creating DCA files...\n");
+    // Execute dcagen                                    
+    int status= -1;
+
+    // Unlock python GIL for another process 
+    Py_BEGIN_ALLOW_THREADS
+    status = system(cmd);
+    // relock GIL 
+    Py_END_ALLOW_THREADS
+
+    // Check failure 
+    if (status == -1 ||  !WIFEXITED(status) || WEXITSTATUS(status) != 0)
+    {
+        fprintf(stderr,
+            "--odb4py : dcagen failed\nCommand: %s\n",  cmd);
+        return PyLong_FromLong(-1);
+    }
+
+
+    // Check creation                                 
+    if (!dir_exists(dca_dir)) {
+        fprintf(stderr,
+            "--odb4py : dcagen finished but no DCA directory found\n");
+        return PyLong_FromLong(-1);
+    }  else  {
+
+    printf("--odb4py : DCA files creation done.\n");
+    return PyLong_FromLong(0);
+
+    }
+}
+
