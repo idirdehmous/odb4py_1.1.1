@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 // Version 
-#define ODB4PY_VERSION "1.0.0"
+#define ODB4PY_VERSION "1.1.1"
 
 // return version  
 static PyObject* odbMeta_version(PyObject *self, PyObject *Py_UNUSED(ignored)) {
