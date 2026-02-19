@@ -5,31 +5,71 @@
 #include <Python.h>
 
 
-static PyObject* odbTables_method(PyObject* Py_UNUSED(self), PyObject* Py_UNUSED(args)) 
-{ 
-char *db_tables[]={"desc","ddrs","hdr","body","index","poolmask","errstat","bufr","bufr_tables","bufr_tables_desc",
-                 "aeolus_auxmet","aeolus_hdr","aeolus_l2c","resat","rtovs","rtovs_body","rtovs_mlev","rtovs_pred",
-"rtovs_slev", "sat", "satem", "satob", "scatt", "scatt_body", "smos", "ralt", "ssmi", "ssmi_body", "ssmi_mlev",
-"ssmi_slev", "timeslot_index", "update", "limb", "resat_averaging_kernel", "radar", "radar_body", "radar_station",
-"surfbody_feedback", "modsurf", "radiance", "allsky", "co2_sink", "cloud_sink", "collocated_imager_information",
-"auxiliary", "auxiliary_body", "radiance_body", "allsky_body", "fcdiagnostic", "gbrad", "gbrad_body", "gnssro",
-"gnssro_body", "ensemble", "conv", "conv_body", "raingg", "raingg_body", 
-"update_1", "update_2", "update_3", "update_4", "update_5", 
-"update_6", "update_7", "update_8", "update_9", "update_10", 
-"enkf_[1-$NUMAUX]", 
-"enda_[1-$NUMAUX]",
-"surfbody_feedback_[1-$NUMAUX]", 
-"fcdiagnostic_body_[1-$NUMAUX]"}; 
 
-long unsigned int i = 0  ; 
-while ( i <= sizeof (db_tables)/ sizeof (double)-2   ) {
-       i++  ; 
-       printf ( "%s\n",  db_tables[i] ) ; 
+// Get all ODB tables 
+static PyObject* odbTables_method(PyObject* Py_UNUSED(self),
+                                  PyObject* Py_UNUSED(args))
+{
+    static PyObject *cached_tables = NULL;
+
+    // Already initialized ? --> return directly  
+    if (cached_tables) {
+        Py_INCREF(cached_tables);
+        return cached_tables;
+    }
+
+    const char *db_tables[] = {
+        "desc","ddrs","hdr","body","index","poolmask","errstat","bufr",
+        "bufr_tables","bufr_tables_desc",
+        "aeolus_auxmet","aeolus_hdr","aeolus_l2c","resat","rtovs",
+        "rtovs_body","rtovs_mlev","rtovs_pred","rtovs_slev",
+        "sat","satem","satob","scatt","scatt_body","smos","ralt",
+        "ssmi","ssmi_body","ssmi_mlev","ssmi_slev","timeslot_index",
+        "update","limb","resat_averaging_kernel","radar","radar_body",
+        "radar_station","surfbody_feedback","modsurf","radiance",
+        "allsky","co2_sink","cloud_sink","collocated_imager_information",
+        "auxiliary","auxiliary_body","radiance_body","allsky_body",
+        "fcdiagnostic","gbrad","gbrad_body","gnssro","gnssro_body",
+        "ensemble","conv","conv_body","raingg","raingg_body",
+        "update_1","update_2","update_3","update_4","update_5",
+        "update_6","update_7","update_8","update_9","update_10",
+        "enkf_[1-$NUMAUX]",
+        "enda_[1-$NUMAUX]",
+        "surfbody_feedback_[1-$NUMAUX]",
+        "fcdiagnostic_body_[1-$NUMAUX]"
+    };
+
+    size_t n_tables = sizeof(db_tables) / sizeof(db_tables[0]);
+
+    // This list of tables don't have to be changed 
+    // Should be contained in an immutable py object   
+    // Create tuple 
+    PyObject *tuple = PyTuple_New(n_tables);
+    if (!tuple)
+        return NULL;
+
+    for (size_t i = 0; i < n_tables; ++i) {
+        PyObject *py_str = PyUnicode_FromString(db_tables[i]);
+        if (!py_str) {
+            Py_DECREF(tuple);
+            return NULL;
+        }
+        // steals ref
+        PyTuple_SET_ITEM(tuple, i, py_str);
+    }
+
+    // Cache 
+    cached_tables = tuple;
+
+    Py_INCREF(cached_tables);  //Increment the ref counter
+    return cached_tables;
 }
-return PyLong_FromLong(0) ; 
-} 
 
 
+
+
+
+// Get all ODB varno, short name  with descriptions 
 static  PyObject*  odbVarno_method(PyObject* Py_UNUSED(self), PyObject* Py_UNUSED(args) )
 {
 char *var_name[]={"u", "v", "z", "dz", "rh", "pwc", "rh2m", "t", "td", "t2m", "td2m", "ts", "ptend", 
@@ -235,75 +275,148 @@ char *desc[]={
 "downward surface solar radiation (J/m2)",
 "chem7: h2o" };
 
+    static PyObject *cached_dict = NULL;
 
-for ( long unsigned int i=0 ; i <= (sizeof (code_no ) /sizeof ( double)) -1  ; i++){
-  printf (  "%s          %s          //%s \n" ,  code_no[i], var_name[i], desc[i] ) ; 
+    if (cached_dict) {
+        Py_INCREF(cached_dict);
+        return cached_dict;
+    }
 
+    // Counter 
+    size_t n =  sizeof(code_no) / sizeof(code_no[0]);
+
+    // Declare a dict
+    PyObject *dict = PyDict_New();
+    if (!dict)
+       return NULL;
+
+    for (size_t i = 0; i < n; ++i) {
+        long varno = strtol(code_no[i], NULL, 10);
+        PyObject *key = PyLong_FromLong(varno);
+        if (!key) goto error;
+
+        PyObject *name = PyUnicode_FromString(var_name[i]);
+        if (!name) { 
+	    Py_DECREF(key); 
+	    goto error; 
+	}
+
+        PyObject *description = PyUnicode_FromString(desc[i]);
+        if (!description) {
+            Py_DECREF(key);
+            Py_DECREF(name);
+            goto error;
+        }
+
+        //  tuple(value) = (name, desc) 
+	//  We wante to return var[varno] = (name ,description )
+        PyObject *value = PyTuple_New(2);
+        if (!value) {
+            Py_DECREF(key);
+            Py_DECREF(name);
+            Py_DECREF(description);
+            goto error;
+        }
+
+        PyTuple_SET_ITEM(value, 0, name);        //  name in ODB column 
+        PyTuple_SET_ITEM(value, 1, description); //  parameter long name 
+
+        if (PyDict_SetItem(dict, key, value) < 0) {
+            Py_DECREF(key);
+            Py_DECREF(value);
+            goto error;
+        }
+
+        Py_DECREF(key);
+        Py_DECREF(value);
+    }
+
+    cached_dict = dict;
+
+    Py_INCREF(cached_dict);
+    return cached_dict;
+
+error:
+    Py_DECREF(dict);
+    return NULL;
 }
-return PyLong_FromLong(0) ;
 
-}
-
-
-
-
-static PyObject* odbFunctions_method(PyObject* Py_UNUSED(self))
+// returns all ODB functions 
+static PyObject* odbFunctions_method(PyObject* Py_UNUSED(self),
+                                     PyObject* Py_UNUSED(args))
 {
-char *cap_funcs[]={ 
-	"Ln", "Lg" , "ftrunc", "Cot", "ACot", "ACot2", "Coth", "Asinh", "Acosh", "Atanh", "ACoth", "sign",
-"touch", "binlo", "binhi", "dnint", "dint", "cmp" , "fmaxval", "fminval", "Cksum32", "duint", "dfloat", "dble",
-"k2c", "c2k", "c2f", "f2c", "k2f", "f2k", "rad", "distance", "dist", "km", "pow", "circle", "lon0to360", "ibits",
-"aYear", "aMonth", "aDay", "anHour", "aMinute", "aSecond"} ;
+    static PyObject *cached = NULL;
+
+    if (cached) {
+        Py_INCREF(cached);
+        return cached;
+    }
+
+    const char *all_funcs[] = {
+
+        // cap_funcs 
+        "Ln","Lg","ftrunc","Cot","ACot","ACot2","Coth","Asinh","Acosh","Atanh",
+        "ACoth","sign","touch","binlo","binhi","dnint","dint","cmp","fmaxval",
+        "fminval","Cksum32","duint","dfloat","dble","k2c","c2k","c2f","f2c",
+        "k2f","f2k","rad","distance","dist","km","pow","circle","lon0to360",
+        "ibits","aYear","aMonth","aDay","anHour","aMinute","aSecond",
+
+        // ws_funcs 
+        "Speed","uv2ff","ff","Dir","dd","Ucom","ucomp","Vcom","vcomp",
+
+        // agg_cap_funcs 
+        "Within","Within360","llu2","Min","Max","Density","Count","Bcount",
+        "Sum","Avg","Median","Stdev","Var","Rms","Dotp","Norm",
+        "Count_distinct","Bcount_distinct","Sum_distinct","Avg_distinct",
+        "Median_distinct","Stdev_distinct","Var_distinct","Rms_distinct",
+        "Dotp_distinct","Norm_distinct","Shared2ArgFunc","Covar","Corr",
+        "Linregr_a","Linregr_b","Maxloc","Minloc",
+
+        // ct_funcs 
+        "sin","cos","tan","cot","asin","acos","atan","atan2","acot","acot2",
+        "sinh","cosh","tanh","coth","asinh","acosh","atanh","acoth","sqrt",
+        "mod","pow","exp","log","ln","lg","log10","floor","ceil","ldexp","abs",
+        "trunc","touch","sign","binlo","binhi","int","nint","cmp","max",
+        "maxval","min","minval","cksum","uint","float","dble","celsius",
+        "k2c","c2k","fahrenheit","k2f","f2k","c2f","f2c","rad","distance",
+        "dist","km","lon0to360","ibits","circle","year","month","day","hour",
+        "hours","minutes","minute","seconds","second","pi","speed","uv2ff",
+        "ff","dir","uv2dd","dd","u","ucomp","ucom","v","vcomp","vcom",
+        "within","within","tstamp","basetime",
+
+        // agg_funcs 
+        "density","count","bcount","sum","avg","median","stdev","var","rms",
+        "dotp","norm","count_distinct","bcount_distinct","sum_distinct",
+        "avg_distinct","median_distinct","stdev_distinct","var_distinct",
+        "rms_distinct","dotp_distinct","norm_distinct","covar","corr",
+        "linregr_a","linregr_b","minloc","maxloc","Conv_llu2"
+    };
 
 
-/* Wind speed (ff), direction (dd), u- and v-components */
-char *ws_funcs[]={"Speed", "uv2ff", "ff"   , "Dir" , "dd"  , "Ucom", "ucomp", "Vcom", "vcomp"};
+    size_t n = sizeof(all_funcs)/sizeof(all_funcs[0]);
 
+    // Declare a tupe object  
+    PyObject *tuple = PyTuple_New(n);
+    if (!tuple)
+        return NULL;
 
-/*Aliases */
-char *agg_cap_funcs[]= {"Within", "Within360", "llu2", "Min",
-"Max", "Density", "Count", "Bcount", "Sum", "Avg", "Median", "Stdev", "Var", "Rms", "Dotp", "Norm", "Count_distinct",
-"Bcount_distinct", "Sum_distinct", "Avg_distinct", "Median_distinct", "Stdev_distinct", "Var_distinct", "Rms_distinct",
-"Dotp_distinct", "Norm_distinct", "Shared2ArgFunc", "Covar", "Corr", "Linregr_a", "Linregr_b", "Maxloc", "Minloc" };
-
-
-/* Compile-time evaluable functions */
-char *ct_funcs[] ={"sin"     ,  "cos"     ,  "tan"      ,  "cot"      , "asin"    ,   "acos"     ,  "atan"     , "atan2"  ,   "acot",
-  "acot2"   ,  "sinh"    ,  "cosh"     ,  "tanh"     , "coth"    ,   "asinh"    ,  "acosh"    , "atanh"  ,   "acoth"   ,   
-  "sqrt"    ,  "mod"     ,  "pow"      ,  "exp"      , "log"     ,   "ln"       ,  "lg"       , "log10"  ,   "floor"   ,   
-  "ceil"    ,  "ldexp"   ,  "abs"      ,  "trunc"    , "touch"   ,   "sign"     ,  "binlo"    , "binhi"  ,   "int"     ,   
-  "nint"    ,  "cmp"     ,  "max"      ,  "maxval"   , "min"     ,   "minval"   ,  "cksum"    , "uint"   ,   "float"   ,  
-  "dble"    ,  "celsius" ,  "k2c"      ,  "c2k"      , "fahrenheit", "k2f"      ,  "f2k"      , "c2f"    ,   "f2c"      , 
-  "rad"     ,  "distance",  "dist"     ,  "km"       , "lon0to360",  "ibits"    ,  "circle"   , "year"   ,   
-  "month"   ,  "day"     ,  "hour"     ,  "hours"    , "minutes"  ,  "minute"   ,  "seconds"  , "second" ,    
-  "pi"      ,  "speed"   ,  "uv2ff"    ,  "ff"       , "dir"      ,  "uv2dd"    ,  "dd"       , "u"      ,   "ucomp"   ,"ucom","v"        ,  "vcomp","vcom","within","within","tstamp", "basetime"};
-
-
-  /* Aggregate functions (prepended with underscore when with FUNCS_C) */
-char *agg_funcs[]={"density" , "count"  , "bcount" , "sum" , "avg" , "median" , "stdev", "var", "rms", "dotp",
-  "norm"    , "count_distinct"    , "bcount_distinct", "sum_distinct"   , "avg_distinct", "median_distinct", 
-  "stdev_distinct"      , "var_distinct"  , "rms_distinct"    , "dotp_distinct", "norm_distinct","covar",
-  "corr"    , "linregr_a", "linregr_b", "minloc","maxloc","Conv_llu2" };
-
-
-//cap
-for ( long unsigned int i=0 ; i<=(sizeof (cap_funcs)/sizeof( double))-1;i++)     {printf(  "%s    \n" ,cap_funcs[i]);}
-//ws 
-for ( long unsigned int i=0 ; i<=(sizeof (ws_funcs)/sizeof( double))-1;i++)      {printf(  "%s    \n" ,ws_funcs[i]);}
-//agg_cap
-for ( long unsigned int i=0 ; i<=(sizeof (agg_cap_funcs)/sizeof( double))-1;i++) {printf(  "%s    \n" ,agg_cap_funcs[i]);}
-//ct
-for ( long unsigned int i=0 ; i<=(sizeof (ct_funcs)/sizeof( double))-1;i++)      {printf(  "%s    \n" ,ct_funcs[i]);}
-//agg 
-for ( long unsigned int i=0 ; i<=(sizeof (agg_funcs)/sizeof( double))-1;i++)     {printf(  "%s    \n" ,agg_funcs[i]);}
-
-
-
-
-return PyLong_FromLong(0) ;
+    for (size_t i = 0; i < n; ++i) {
+        PyObject *s = PyUnicode_FromString(all_funcs[i]);
+        if (!s) {
+            Py_DECREF(tuple);
+            return NULL;
+        }
+        PyTuple_SET_ITEM(tuple, i, s); //   Set value
+    }
+    cached = tuple;
+    Py_INCREF(cached);
+    return cached;
 }
+
+
 
 /*static PyObject* odbSchema_method (  ){
+
 //      1  desc
 //      2  +---> poolmask
 //      3  +---> timeslot_index
