@@ -1,7 +1,6 @@
-#-*- coding; utf-8 -*-  
-import sys , os 
-import re 
-from   glob         import glob  
+import sys , os
+import re
+from   glob         import glob
 
 
 __all__=["OdbObject"]
@@ -9,11 +8,10 @@ __all__=["OdbObject"]
 
 from   .parser       import StringParser
 from   .exceptions   import *
-from   .odb_glossary import OdbLexic 
-
+from   .odb_glossary import OdbLexic
 
 # INSTANTIATE 
-m=odb4pyErrMessage()
+m=pyodbErrMessage()
 msg_err=m._ErrMsg()
 
 lex=OdbLexic ()
@@ -21,183 +19,145 @@ lex=OdbLexic ()
 
 
 class OdbObject:
-      def __init__(self, path ):
-          if os.path.isdir( path ):
-             self.path =  path 
-          else:
-             print( msg_err[8].format(path) )
-             sys.exit(0)
-          return None
 
-      @classmethod 
-      def CheckExist (self,obj):
-          # FOR PATH 
-          if isinstance ( obj, str ):
-             if os.path.isdir ( obj  ):
-                return True 
-             else:
-                return False 
+    def __init__(self, path):
+        if not os.path.isdir(path):
+           raise FileNotFoundError ("Path to ODB not found ")
+           sys.exit(0)
 
-      @classmethod        
-      def GetBasename(self, path):
-         self.path = path 
-         # MUST HANDLE ANY ODB NAME , TODo ! (WE stay with ECMA CCMA for the moment ! )
-         ecma_found = re.search  ( "ECMA" , self.path   )
-         ccma_found = re.search  ( "CCMA" , self.path   )
-         if ecma_found :
-            dbtype = os.path.basename(os.path.normpath(path) )[0:4]
-            dbname = os.path.basename(os.path.normpath(path) )
-            return dbtype , dbname
-#         else:
-#            print("ODB path endpoint should be ECMA.<obstype>, got argument :" , self.path ) 
-#            sys.exit (0)
-
-         elif ccma_found  :
-            dbtype = os.path.basename(os.path.normpath(path) )[0:4]
-            dbname = os.path.basename(os.path.normpath(path) )
-            return dbtype , dbname 
-
-         else:
-            print("ODB path endpoint should be ECAM.<obstype> OR CCMA, but got argument :" , self.path )
-            sys.exit (0)
-
-
-      @classmethod
-      def HasFlags(self, path, type_):
-          if self.CheckExist(path ):
-            flag_file=path+"/"+type_+".flags"
-            if os.path.isfile (flag_file):
-               return flag_file
-            else:
-               return None 
+        self.path   = path
+        self.attrs = None 
 
 
 
-      @classmethod
-      def HasIoassign(self, path, type_):
-          if self.CheckExist(path ):
-             io_file  =path+"/IOASSIGN"             # IOASSIGN FILE 
-             if os.path.isfile( io_file ):
-                return io_file 
-             sym_file =path+"/"+type_+".IOASSIGN"   # SYM LINK  EXISTS AFTER RUNNING   dcagen or odbtools.x 
-             if os.path.islink ( sym_file ):
-                return sym_file 
-
-      @classmethod
-      def HasIomap (self , path , type_):
-          if self.CheckExist(path ):
-             iomap_file  =path+"/"+type_+".iomap"
-             if os.path.isfile(iomap_file ):
-                return iomap_file
-             else:
-                return None 
+    def GetBasename(self):
+        base = os.path.basename(os.path.normpath(self.path))
+        if base.startswith("CCMA"):
+           cma_type = base 
+           db_name  = base 
+           return (db_name , cma_type , None    )
+        elif base.startswith("ECMA"):
+           db_name  = base 
+           cma_type = base[:4]
+           obs_type = base[5:]
+           return (db_name , cma_type , obs_type )
+        else:            
+           print("ODB endpoint unknown. It should be ECMA.<obstype> OR CCMA :", self.path)
+           sys.exit(0)
 
 
-      @classmethod
-      def GetSize(self , path):
-          total=0
-          with os.scandir(path) as it:
-               for entry in it:
-                   if entry.is_file():
-                      total += entry.stat().st_size
-                   elif entry.is_dir():
-                     total += self.GetSize(entry.path)
-          # TOTAL IN Bytes
-          return total 
+    # ---------------------
+    def HasFlags(self, type_):
+        flag = os.path.join(self.path, f"{type_}.flags")
+        if os.path.isfile(flag):
+           return flag  
+        else:
+           return None
 
 
-      @classmethod       
-      def GetPools(self, path ):
-          pools=[]
-          if self.CheckExist ( path ):
-             content=os.listdir(path) 
-             regex=r"^(?:0|[1-9]\d{0,2})$"
-             for item in content:
-                 pattern =re.findall( regex, item  )  
-                 if len(pattern ) != 0:
-                    for i in range(len(pattern)):
-                        pools.append(pattern[i])
+    def HasIoassign(self, type_):
+        io_file = os.path.join(self.path, "IOASSIGN")
+        if os.path.isfile(io_file):
+           return io_file
+       
+        sym = os.path.join(self.path, f"{type_}.IOASSIGN")
+        if os.path.islink(sym):
+           return sym
 
-          return pools 
+        else:
+           return None 
 
 
-      @classmethod 
-      def GetTables(self, path):
-          # GET ONLY THE COMMON TABLES in POOLS 
-          # THE TABLES ARE MOSTLY IN POOL 1 
-          # GOING FURTHER , SHOW THE TABLES OF ALL POOLS IS SHOWING "almost" THE ODB COMPLETE SCHEMA (later )!
-          poolmask = self.GetPools(path)
-          dbtabs   = lex.odbTables()
-          current_tables =[]
-          for p in poolmask:
-              if p == "1" and os.path.isdir(path+"/"+p):
-                 tb=os.listdir(path+"/"+p  )
-                 for t in tb:
-                     current_tables.append(t)
-                 
-          return sorted(current_tables )
+    def HasIomap(self, type_):
+        iomap = os.path.join(self.path, f"{type_}.iomap")
+        if os.path.isfile(iomap):
+           return iomap 
+        else: 
+           return None
 
 
 
-      def GetAttrib (self):
-          self.attrs_={}
-          if not self.CheckExist(self.path):
-              print(msg_err[8].format(  self.path ))
-              sys.exit (0)
-          else:
-             type_ , name = self.GetBasename ( self.path  ) 
-             obstype= name.replace( type_+".", "" )
-             self.attrs_["type"]   =type_
-             self.attrs_["name"]   =name
-             self.attrs_["obstype"]=obstype
-          
-          # LOOK FOR Data Description File ( OFTEN ECMA.dd or CCMA.dd )  
-          if self.CheckExist( self.path ):                                                                       
-             ddfile  =glob(self.path+"/*.dd"  )
-             schfile =glob(self.path+"/*.sch" )
-    
-             if   len(ddfile) == 0:
-                print( msg_err[6].format( type_ ) )
-
-             elif len(schfile) ==0:
-                print( msg_err[7].format( type_ ) )
-                sys.exit(0)
-             else:
-                type_ , name = self.GetBasename ( self.path )
-                file_=open( self.path+"/"+type_+".dd" , "r" )    # READ .dd FILE 
-                lines=file_.readlines()[:6]
-                odb_vers   =lines[0].rstrip()
-                creat_date =lines[1].rstrip()
-                modif_date =lines[2].rstrip()
-                obs_dttm   =lines[3].rstrip()
-                npool      =lines[4].rstrip()
-                ntables    =lines[5].rstrip()
-
-                db_size =self.GetSize     (self.path )
-
-                poolmask=self.GetPools    (self.path)   
-                flags   =self.HasFlags    (self.path, type_  )
-                ioassign=self.HasIoassign (self.path, type_  )
-                iomap   =self.HasIomap    (self.path, type_  )
-
-                tabs=self.GetTables ( self.path   )
-
-                self.attrs_.update({
-                                    "date_creation"           :creat_date,
-                                    "last_modification"       :modif_date,
-                                    "Observation_date"        :obs_dttm,
-                                    "number_pools"            :npool,
-                                    "number_of_considered_tables" :ntables,
-                                    "odb_total_size"          : db_size ,
-                                    "poolmask"                : poolmask,
-                                    "tables"                  : tabs ,
-                                    "ioassign_file"           : ioassign,
-                                    "flags_file"              : flags,
-                                    "iomap_file"              : iomap,
-                                    "odb_software_release"    : odb_vers} )
-
-          
-          return self.attrs_ 
+    # ---------------------
+    def GetSize(self, path=None):
+        """
+        Equivalent to bash command : du --apparent-size --total -B1   ../../CCMA  or ECMA.obstype
+        Count the file size using st_size and not with file blocks on the disk .
+        """
+        if path is None:
+            path = self.path
+        total = 0
+        with os.scandir(path) as it:
+            for entry in it:
+                if entry.is_file():
+                   total += entry.stat().st_size
+                elif entry.is_dir():
+                   total += self.GetSize(entry.path)
+        return total
 
 
+    # ---------------------
+    def GetPools(self):
+        pools = []
+        regex = r"^(?:0|[1-9]\d{0,2})$"
+        for item in os.listdir(self.path):
+            if re.match(regex, item):
+                pools.append(item)
+        return sorted(pools)
 
+
+    # ---------------------
+    def GetTables(self):
+        tables = []
+        for p in self.GetPools():
+            if p == "1":
+                pooldir = os.path.join(self.path, p)
+                if os.path.isdir(pooldir):
+                    tables.extend(os.listdir(pooldir))
+        return sorted(tables)
+
+
+    # Get attributes 
+    def _load_attributes(self):
+        attrs = {}
+        dbname , type_, obstype = self.GetBasename()
+        attrs.update({ "name": dbname , 
+                       "type": type_,    
+                       "obstype": obstype,   })
+
+        ddfile  = glob(os.path.join(self.path, "*.dd"))
+        if not ddfile:
+           raise FileNotFoundError ( type_+".dd  file not foud." )
+     
+   
+        dd_path = os.path.join(self.path, f"{type_}.dd")
+        with open(dd_path) as f:
+             lines = f.readlines()[:6]
+
+        odb_vers, creat_date, modif_date, obs_dttm, npool, ntables =  [l.rstrip() for l in lines]
+         
+        attrs.update({
+        "date_creation"     : creat_date,
+        "last_modification" : modif_date,
+        "observation_date"  : obs_dttm,
+        "number_pools"      : npool,
+        "odb_total_size"    : self.GetSize(),
+        "Poolmask"          : self.GetPools(),
+        "tables"            : self.GetTables(),
+        "ioassign_file"     : self.HasIoassign(type_),
+        "flags_file"        : self.HasFlags(type_),
+        "iomap_file"        : self.HasIomap(type_),
+        "number_of_considered_tables"  : ntables,
+        "odb_software_release"  : odb_vers,
+            })
+        return attrs
+
+
+    def GetAttrib(self):
+        self.attrs = self._load_attributes()
+        return self.attrs
+
+    #@property
+    #def attrs(self):
+    #    if self._attrs is None:
+    #       self._attrs = self._load_attributes()
+    #    return self._attrs 
