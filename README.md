@@ -2,7 +2,7 @@
 [![Documentation Status](https://readthedocs.org/projects/odb4py/badge/?version=latest)](https://odb4py.readthedocs.io)
 ![Python](https://img.shields.io/pypi/pyversions/odb4py)
 
-# odb4py 1.1.0 release
+# odb4py 1.1.1 release
 
 ## Description
 
@@ -56,6 +56,15 @@ and widely used in numerical weather prediction systems such as IFS,ARPEGE and N
 ## License
 Apache License, Version 2.0. [See LICENSE for details ](https://www.apache.org/licenses/LICENSE-2.0).
 
+
+odb4py incorporates components derived from the ECMWF ODB software.
+
+The original source code has been modified to:
+- expose functionality through a Python interface
+- reduce the runtime footprint
+- enable portable binary wheel distribution
+
+All original copyrights remain with ECMWF.
 
 ## Acknowledgements
 This project incorporates and is derived from the ECMWF ODB software. <br/>
