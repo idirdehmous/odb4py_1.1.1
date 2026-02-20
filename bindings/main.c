@@ -18,7 +18,7 @@ static PyMethodDef module_methods[] = {
     {"odbFunctions",  (PyCFunction)(void(*)(void))  odbFunctions_method  , METH_VARARGS | METH_KEYWORDS,  "Print all the possible functions that could be used in ODB sql statement"},
     {"odbDict"   ,    (PyCFunction)(void(*)(void))  odbDict_method       , METH_VARARGS | METH_KEYWORDS,  "Fetch ODB rows as a python  dictionnary"},
     {"odbDca"    ,    (PyCFunction)(void(*)(void))  odbDca_method        , METH_VARARGS | METH_KEYWORDS,  "Create DCA  (Direct Column  Access ) files "},
-    {"odbGcdistance", (PyCFunction)(void(*)(void))  odbGcdistance_method , METH_VARARGS | METH_KEYWORDS,  "Compute great circle distance between numpy lat/lon pairs"},
+    {"odbGcdist" , (PyCFunction)(void(*)(void))  odbGcdistance_method , METH_VARARGS | METH_KEYWORDS,  "Compute great circle distance between numpy lat/lon pairs"},
     {"version"   , odbMeta_version, METH_NOARGS, "Return the odb4py version."  },
     {"info"      , odbMeta_info,    METH_NOARGS, "Return build and Python info."},
 };
