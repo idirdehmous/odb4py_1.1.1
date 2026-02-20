@@ -1,3 +1,7 @@
+# odb4py
+# Copyright (C) 2026 Royal Meteorological Institute of Belgium (RMI)
+#
+# Licensed under the Apache License, Version 2.0
 #-*- codind : utf-8 -*- 
 import sys , os 
 
