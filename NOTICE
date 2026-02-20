@@ -1,0 +1,23 @@
+odb4py
+
+This product includes software developed at the
+European Centre for Medium-Range Weather Forecasts (ECMWF).
+
+Portions of this software are derived from the ECMWF ODB (Observation DataBase) API bundle.
+
+Original ODB software:
+Copyright (C) ECMWF.
+All rights reserved.
+
+Modifications and adaptations have been made in odb4py
+to provide a Python C-extension interface and a reduced
+runtime suitable for distribution as Python wheels.
+
+These modifications include:
+ - pruning unused components of the ODB API bundle
+ - integration into a Python C extension
+ - build system redesign using CMake and scikit-build
+ - runtime packaging for manylinux compatibility
+
+The original ODB software remains property of ECMWF
+and its respective contributors.
