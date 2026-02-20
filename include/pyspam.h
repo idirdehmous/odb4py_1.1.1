@@ -1,3 +1,11 @@
+/* odb4py :
+ * Copyright (C) 2026 Royal Meteorological Institute of Belgium (RMI)
+ * Author : Idir Dehmous 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ */
 #ifndef PYSPAM_H
 #define PYSPAM_H
 #define PY_SSIZE_T_CLEAN
@@ -17,7 +25,7 @@
 
 
 // BUILD THE DATA TYPE STRING 
- static PyObject* makeString_data (char *data, npy_intp n, int N) {
+/* static PyObject* makeString_data (char *data, npy_intp n, int N) {
     // FOR Python >= 3.12 
     PyArray_Descr *descr = PyArray_DescrNewFromType(NPY_STRING);
     #if NPY_ABI_VERSION < 0x2000000
@@ -30,7 +38,7 @@
     // Strides NULL => contigu with stride = elsize = 8
     PyObject *arr = PyArray_NewFromDescr(&PyArray_Type, descr,1, dims, NULL,(void*)data, 0, NULL);
     return arr;
-}
+}*/
 
 
 
