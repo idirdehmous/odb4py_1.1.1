@@ -1,6 +1,9 @@
 #!/bin/ksh
 #create_ioassign      version:  20130305
 
+#Last mofication   :  20260226 
+# Line  204 : The script prints the tables even the option -q (quite is set to 1)
+
 set -eu
 #=======================================================================
 #
@@ -26,6 +29,7 @@ set -eu
 #                   task      - component database(s); like -t amsua for ECMA.amsua
 #
 #=======================================================================
+
 
 ARGS="$0 $*"
 USAGE1="$0 -l dbname [-d dirname] [-n npools]"
@@ -59,6 +63,7 @@ do
    \?) errflg=1;;
   esac
 done
+
 
 if [[ $silence -eq 0 ]] ; then
   echo "$ARGS" >&2
@@ -199,7 +204,10 @@ ioassign -s -a \$ODB_SRCPATH_$dbname/$dbname.iomap $dbname.iomap  >> $tmpfile
 #         only applicable for self-contained databases i.e. $expand == 0
 dcadir=dca
 if [[ $expand -eq 0 ]] && [[ $alltasks == "" ]] ; then
-    echo "tables=$tables"
+    if [[ $silence -eq 0 ]]  ; then  
+       echo "tables=$tables"
+    fi 
+
     awk \
     '(NR==1) { dca=$0; };(NR >= 2) { \
             for (i=1; i<=NF; i++) { x=dca; gsub("TABLENAME",$i,x); print x; }}' >> $tmpfile \
