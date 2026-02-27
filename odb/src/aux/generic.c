@@ -305,7 +305,7 @@ ODBc_open(const char *dbname, const char *mode, int *npools, int *ntables, const
 	      int iret = 0;
 	      extern Bool odbdump_on;
 	      const char *dcagen_fmt = 
-		odbdump_on ? "%s -i %s -F -n -q -N 1 -z -E odb4py.stderr" : "%s -i %s -F -n -q -N 1 -z";
+		odbdump_on ? "%s -i %s -F -n -q -N 1 -z " : "%s -i %s -F -n -q -N 1 -z";
 	      char *cmd = NULL;
 	      len = STRLEN(dcagen_fmt) + STRLEN(dcagen_cmd) + STRLEN(ph->srcpath) + 1;
 	      ALLOCX(cmd, len);
