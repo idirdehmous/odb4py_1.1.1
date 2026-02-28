@@ -73,7 +73,7 @@ class OdbEnv:
       def __init__(self):
           pass 
 
-      def InitEnv(self ):
+      def Init(self ):
           if os.path.isdir (libdir):
              lib=CDLL ("/".join(    (libdir, libname)    ))
 
