@@ -1837,13 +1837,13 @@ if (ODBMP_myproc == 1) then
   call codb_getcwd(pwd)
   call util_cgetenv('ODB_SRCPATH_'//trim(db(handle)%name), &
        & trim(pwd), CLsrcpath, idummy)
-  write(0,*) 'ODB_SRCPATH_'//trim(db(handle)%name)//'="'//CLsrcpath(1:idummy)//'"'
+ ! write(0,*) 'ODB_SRCPATH_'//trim(db(handle)%name)//'="'//CLsrcpath(1:idummy)//'"'
   call util_cgetenv('ODB_DATAPATH_'//trim(db(handle)%name), &
        & trim(CLsrcpath), CLdatapath, idummy)
-  write(0,*) 'ODB_DATAPATH_'//trim(db(handle)%name)//'="'//CLdatapath(1:idummy)//'"'
+ ! write(0,*) 'ODB_DATAPATH_'//trim(db(handle)%name)//'="'//CLdatapath(1:idummy)//'"'
   call util_cgetenv('ODB_IDXPATH_'//trim(db(handle)%name), &
        & trim(CLsrcpath)//'/idx', CLidxpath, idummy)
-  write(0,*) 'ODB_IDXPATH_'//trim(db(handle)%name)//'="'//CLidxpath(1:idummy)//'"'
+ ! write(0,*) 'ODB_IDXPATH_'//trim(db(handle)%name)//'="'//CLidxpath(1:idummy)//'"'
   write(0,*) 'inuse ? ',db(handle)%inuse
   write(0,*) 'newdb ? ',db(handle)%newdb
   write(0,*) 'readonly ? ',db(handle)%readonly
