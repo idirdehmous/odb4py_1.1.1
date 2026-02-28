@@ -1,13 +1,3 @@
-/*
- * odb4py
- * Copyright (C) 2026 Royal Meteorological Institute of Belgium (RMI)
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- */
-
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include <stdio.h>
@@ -20,13 +10,6 @@
 #include <time.h>
 
 
-
-
-// Check file exists
-/*static int  file_exists(  const char *path ) {
-struct stat st  ;   
-return ( stat( path , &st ) ==  0 && S_ISREG(st.st_mode))  ;
-}*/
 
 
 // Check dir exists 
@@ -159,10 +142,10 @@ static PyObject * odbDca_method(PyObject *Py_UNUSED(self), PyObject *args, PyObj
     char cmd  [4096]  ;
     char cpu_str[32]  ;
 
+
     // Concat  
     snprintf(cpu_str, sizeof(cpu_str), "%d", ncpu);
     snprintf(cmd, sizeof(cmd), "%s/dcagen -i '%s' -N %s -q -z -P", bebin, dbpath, cpu_str);
-
 
     if (extra && strlen(extra) > 0) {
         strncat(cmd, " ", sizeof(cmd)-strlen(cmd)-1);
@@ -192,12 +175,20 @@ if ( tables &&  PySequence_Check(tables)) {
 }
 
    
-    printf("--odb4py : Creating DCA files...\n");
+    printf("--odb4py : Creating DCA files ...\n");
     // Execute dcagen                                    
     int status= -1;
 
     // Unlock python GIL for another process 
     Py_BEGIN_ALLOW_THREADS
+
+
+    // Path
+    // Can't be seen by the children processes  
+    // The env is set in dcagen script itself   
+    //const char *new_path = getenv("PATH");
+    //setenv("PATH", new_path  , 1);
+
     status = system(cmd);
     // relock GIL 
     Py_END_ALLOW_THREADS
@@ -206,7 +197,7 @@ if ( tables &&  PySequence_Check(tables)) {
     if (status == -1 ||  !WIFEXITED(status) || WEXITSTATUS(status) != 0)
     {
         fprintf(stderr,
-            "--odb4py : dcagen failed\nCommand: %s\n",  cmd);
+            "--odb4py : dcagen failed\nCommand : %s\n",  cmd);
         return PyLong_FromLong(-1);
     }
 
@@ -214,7 +205,7 @@ if ( tables &&  PySequence_Check(tables)) {
     // Check creation                                 
     if (!dir_exists(dca_dir)) {
         fprintf(stderr,
-            "--odb4py : dcagen finished but no DCA directory found\n");
+            "--odb4py : dcagen finished but no DCA directory found.\n");
         return PyLong_FromLong(-1);
     }  else  {
 
