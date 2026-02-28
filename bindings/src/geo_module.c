@@ -21,6 +21,8 @@
 // Power 
 #define POWDI(x,i) pow(x,i)
 
+#include "sql_build.h"
+
 
 
 
@@ -195,98 +197,14 @@ static PyObject* odbGcdist_method( PyObject* Py_UNUSED(self) , PyObject* args)
 
 
 
-typedef struct {
-    PyObject *parts;   // liste Python de morceaux SQL
-} SQLBuilder;
-
-static SQLBuilder *
-sqlbuilder_new(void)
-{
-    SQLBuilder *b = PyMem_Malloc(sizeof(SQLBuilder));
-    if (!b) return NULL;
-    b->parts = PyList_New(0);
-    if (!b->parts) {
-        PyMem_Free(b);
-        return NULL;
-    }
-    return b;
-}	
-
-
-static int sqlbuilder_add(SQLBuilder *b, const char *text)
-{
-    PyObject *s = PyUnicode_FromString(text);
-    if (!s) return -1;
-    int rc = PyList_Append(b->parts, s);
-    Py_DECREF(s);
-    return rc;
-}
 
 
 
-static int
-sqlbuilder_addf(SQLBuilder *b, const char *fmt, ...)
-{
-    va_list args;
-    va_start(args, fmt);
-
-    va_list args_copy;
-    va_copy(args_copy, args);
-
-    int needed = vsnprintf(NULL, 0, fmt, args_copy);
-    va_end(args_copy);
-
-    if (needed < 0) {
-        va_end(args);
-        return -1;
-    }
-
-    char *buffer = PyMem_Malloc(needed + 1);
-    if (!buffer) {
-        va_end(args);
-        return -1;
-    }
-
-    vsnprintf(buffer, needed + 1, fmt, args);
-    va_end(args);
-
-    PyObject *s = PyUnicode_FromString(buffer);
-    PyMem_Free(buffer);
-
-    if (!s)
-        return -1;
-
-    int rc = PyList_Append(b->parts, s);
-    Py_DECREF(s);
-
-    return rc;
-}
-
-
-
-
-
-
-static PyObject *sqlbuilder_build(SQLBuilder *b)
-{
-    PyObject *empty = PyUnicode_FromString("");
-    if (!empty) return NULL;
-
-    PyObject *sql = PyUnicode_Join(empty, b->parts);
-    Py_DECREF(empty);
-    return sql;
-}
-
-static void sqlbuilder_free(SQLBuilder *b){
-    if (!b) return;
-    Py_XDECREF(b->parts);
-    PyMem_Free(b);
-}
 
 
 
 // Get  geopoints :  lat/lon and obsvalue 
-static PyObject *odbGeopoints_method(PyObject *self, PyObject *args, PyObject *kwargs)
+static PyObject *odbGeopoints_method(PyObject *Py_UNUSED(self) , PyObject *args, PyObject *kwargs)
 {
     char *database  = NULL;
     char *sql_cond  = NULL;
@@ -374,7 +292,6 @@ if (extent_obj != Py_None) {
 
 }
 
-
 // Add SQL parts 
 if (sql_cond && strlen(sql_cond) > 0) { 
    sqlbuilder_addf(sqlb,  " AND %s ", sql_cond);
@@ -386,7 +303,7 @@ sqlbuilder_free(sqlb);
 
 if (!sql_obj)
     return NULL;
-const char *geo_sql = PyUnicode_AsUTF8(sql_obj);
+//const char *geo_sql = PyUnicode_AsUTF8(sql_obj);
 
 
 // Insert to a dict object  
