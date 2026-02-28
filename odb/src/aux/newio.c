@@ -191,8 +191,8 @@ init_IOs()
         //FILE *fp  ; 
         //fp = fopen("pyodb.stdout"  ,  "w");
 	printf("********%s*******" , " New ODB I/O opened with the following environment  \n")  ;
-        printf("*** %s:init_IOs() ***\n",__FILE__);
-        printf("\tODB_WRITE_EMPTY_FILES=%d\n",io_write_empty_files);
+        //printf("*** %s:init_IOs() ***\n",__FILE__);
+        //printf("\tODB_WRITE_EMPTY_FILES=%d\n",io_write_empty_files);
         printf("\t  ODB_CONSIDER_TABLES=%s\n",consider_tables);
         printf("\t   ODB_IO_KEEP_INCORE=%d\n",io_keep_incore);
         printf("\t      ODB_IO_FILESIZE=%d MB\n",io_filesize);
