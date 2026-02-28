@@ -1,14 +1,3 @@
-/*
- * odb4py :
- * Copyright (C) 2026 Royal Meteorological Institute of Belgium (RMI)
- * Author : Idir Dehmous
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- */
-
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include <numpy/arrayobject.h>
@@ -21,11 +10,9 @@
 
 
 
-
-// odbFetchnum : returns tuple 
-// header =True    (header , data as  np array)  
-// header =False   (None   , data as  np array)
-static PyObject * odbArray_method (PyObject *Py_UNUSED(self), PyObject *args, PyObject *kwargs)
+// odbArray  : numeric-only fetch  ---->  returns numpy.ndarray
+// The variables type 'string' are ignored  
+static PyObject * odbArray_method(PyObject *Py_UNUSED(self), PyObject *args, PyObject *kwargs)
 {
     import_array();
 
@@ -167,7 +154,6 @@ static PyObject * odbArray_method (PyObject *Py_UNUSED(self), PyObject *args, Py
              // header 
              if (lheader) {
                 header_list = PyList_New(0);
-                int h = 0  ; 
                 for (int i = 0; i < nci; ++i) {
 
                    if (ci[i].dtnum == DATATYPE_STRING)   continue;
@@ -290,4 +276,6 @@ mem_error:
     free(buffer);
     return PyErr_NoMemory();
 }
+
+
 
