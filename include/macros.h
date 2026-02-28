@@ -33,11 +33,11 @@
     if (eq) { \
       *eq = '\0'; \
       env = getenv(penv); \
-      fprintf(stderr,"%s=%s\n",penv,env?env:NIL); \
+     if (env) { FREE(x##_dbname); x##_dbname = STRDUP(env); } \
     } \
     FREE(penv); \
   } \
 }
 
 // moved from the macro above 
-//if (env) { FREE(x##_dbname); x##_dbname = STRDUP(env); } \
+//fprintf(stderr,"%s=%s\n",penv,env?env:NIL); \
