@@ -25,10 +25,18 @@ odb4py_0.1.0
 - v1.1.0 More stable I/O by enhacing the io_module.c  (odbConnect and odbClose methods )
 - v1.1.0 The odbFetch function was moved to odbDict to return a python dictionnary with colnames as keys. 
 
-## [Release]
+## [Pre-release]
 - VERSION 1.1.0
-- v1.1.0 Date of release : 15/12/2025
+- v1.1.0 Date of pre-release : 15/12/2025
 - v1.1.0 Tested with ODBs from different ACCORD countries (RMI , CHMI , CHMZ and the global ARPEGE ODBs )
 - v1.1.0 A module called geo_module.c was added. Contains functions to compute the great circle distances from latlon pairs (25-11-2025 )
 - v1.1.0 Compilation using many linux and cuibuildwheel + docker environmment  ( 10/02/2026 )
 - v1.1.0 First packaging on TestPyPi  
+
+
+## [Release]
+- VERSION 1.1.1
+- v1.1.1 Date of release : 15/02/2025
+- v1.1.1 Setting the ODB environment completly inside the wheel file (bin , lib + include ) 
+- v1.1.1 Add a function 'odbGeopoints' which gets the lat/lon and obsvalue only given some  options (e.i domain extent )
+- v1.1.1 The backend ODB environment is set automatically by importing the package or any sub-package
