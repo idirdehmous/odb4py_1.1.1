@@ -165,7 +165,7 @@ Runtime duration: 0:00:04.77
    :align: center
    :alt: ODB observations plotted with Cartopy
 
-   Example: visualization of ODB observations plotted using Cartopy.
+   Example: visualization of ODB observations (MetCOop domain).
 
 This workflow enables rapid visual diagnostics of observation coverage
 and spatial distribution, which are essential in data assimilation and
