@@ -10,5 +10,5 @@ __version__ = "1.1.1"
 from .utils.setting_env import OdbEnv
 if not globals().get("_ODB_ENV_INITIALIZED", False):
     _env = OdbEnv()
-    _env.InitEnv()
+    _env.Init()
     _ODB_ENV_INITIALIZED = True
