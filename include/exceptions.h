@@ -3,7 +3,6 @@
 #include  "Python.h"
 
 
-
 extern PyObject* odb4py_Error;
 extern PyObject* odb4py_Warning;
 extern PyObject* odb4py_InterfaceError;
