@@ -283,15 +283,16 @@ static PUBLIC   PyObject*   odbConnect_method ( PyObject *Py_UNUSED(self) , PyOb
 
 
 // Close the ODB 
-static PUBLIC PyObject* odbClose_method(PyObject *Py_UNUSED(self), PyObject *Py_UNUSED(args) )
+static PUBLIC PyObject* odbClose_method(PyObject *Py_UNUSED(self), PyObject *args)
 {
-    int handle=1;
+    int handle;
 
-    /*if (!PyArg_ParseTuple(args, "i", &handle)) {
+    // handle mandatory 
+    if (!PyArg_ParseTuple(args, "i", &handle)) {
         PyErr_SetString(PyExc_ValueError,
             "--odb4py : odbClose(handle) expects an integer handle.");
         return NULL;
-    }*/
+    }
 
     if (!free_handles || handle < 1 || handle > maxhandle) {
         fprintf(stderr,
@@ -326,7 +327,7 @@ static PUBLIC PyObject* odbClose_method(PyObject *Py_UNUSED(self), PyObject *Py_
         FREE(ph->tblname);
     }
 
-    // Reset structures to NULL or 0 
+    // ---- reset structure 
     ph->srcpath  = NULL;
     ph->datapath = NULL;
     ph->idxpath  = NULL;
