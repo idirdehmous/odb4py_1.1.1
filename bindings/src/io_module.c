@@ -31,36 +31,51 @@ ODBc_get_free_handles(int *Maxhandle)
 static PUBLIC   PyObject*   odbConnect_method ( PyObject *Py_UNUSED(self) , PyObject* args ,  PyObject *kwargs)  {
 	char *dbname  =NULL  ; 
         char *mode    =NULL  ;
-        char *poolmask=NULL  ;
 	int  *npools  =0     ;
 	int  *ntables =0     ; 
- 
+
+	
         if(dbname  ) FREE(dbname)   ;
         if(mode    ) FREE(mode)     ;
         if(npools  ) FREE(npools )  ;
         if(ntables ) FREE(ntables)  ;
-        if(poolmask) FREE(poolmask) ;
 
-        PyObject *verbose  =NULL  ; 
-        Bool      lverb    =false   ; 
-	
-	static char *kwlist[] = {"odbdir" , "verbose", "npools", NULL };
-       if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s|Oi",      // dbpath is required , verbose and npools are optional 
+        // Init  pyobj to None 
+        PyObject *poolmask_obj = Py_None  ;
+        PyObject *verbose      = Py_None  ;
+
+
+	static char *kwlist[] = {"odbdir" , "verbose", "poolmask", NULL };
+       if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s|OO",      // dbpath is required , verbose and npools are optional 
                   			    kwlist ,
                                             &dbname ,
                                             &verbose, 
-					    &npools 
+					    &poolmask_obj 
 					    ))
        {
 	PyErr_SetString(PyExc_ValueError, "--odb4py  odbConnect(): invalid arguments. Use odbConnect('/path to.../ODB').");
         return NULL;
        }
-    
+
+       // no verbosity  
+       Bool      lverb        = false    ;
+
       if (verbose && PyObject_IsTrue(verbose)) {
         lverb = true;
       } else {
         lverb = false;
             }
+
+    // Convert poolmask  to C string  
+    const char *poolmask = NULL;
+    if (poolmask_obj != Py_None) {
+        if (!PyUnicode_Check(poolmask_obj)) {
+         PyErr_SetString(PyExc_TypeError, "poolmask must be a string.  ex: '1 2 3 N' or '1:N' N=Number of pools'  \n") ;
+         return NULL;
+         }
+     poolmask  = PyUnicode_AsUTF8(poolmask_obj);
+      }
+
 
       Bool error = false;
       int handle = -1 ; 
@@ -337,7 +352,7 @@ static PUBLIC PyObject* odbClose_method(PyObject *Py_UNUSED(self), PyObject *arg
     ph->npools   = 0;
     ph->h        = 0;
 
-    fprintf(stderr, "--odb4py : database closed.\n");
+    fprintf(stderr, BGRN  "--odb4py : database closed.\n");
 
     return PyLong_FromLong(0);
 }
