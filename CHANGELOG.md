@@ -36,7 +36,12 @@ odb4py_0.1.0
 
 ## [Release]
 - VERSION 1.1.1
-- v1.1.1 Date of release : 15/02/2025
 - v1.1.1 Setting the ODB environment completly inside the wheel file (bin , lib + include ) 
 - v1.1.1 Add a function 'odbGeopoints' which gets the lat/lon and obsvalue only given some  options (e.i domain extent )
 - v1.1.1 The backend ODB environment is set automatically by importing the package or any sub-package
+
+## [Release]
+- VERSION 1.1.2
+- v1.1.2 Patch the  program poolmasking.c  , print only necessary info concerning the poolmask 
+- v1.1.2 Add the poolmasking option to the odbDca method 
+- v1.1.2 Clean the methods getting the ODB attributes 
