@@ -18,6 +18,9 @@
 #include "ncdf.h"
 
 
+
+
+// Get the returned rows and to encode into NetCDF 
 static int rows4nc(char *database,
                    char *sql_query,
                    int   fcols,
@@ -71,18 +74,14 @@ static int rows4nc(char *database,
 
             *cols    = malloc(sizeof(nc_column_t) * nci);
             *strbufs = calloc(nci, sizeof(char*));
-
             if (!*cols || !*strbufs)
                 goto mem_error;
-
 // Realloc if necessary   ( row_idx greater than tot_rows. Worth doing it  ?? )
 if (row_idx >= total_rows) {
-         total_rows *= 2;
-	 
+         total_rows *= 2;	
 	 size_t size = (size_t)total_rows * (*ncols);
-        *buffer = realloc(*buffer, sizeof(double)*  size  );
-
-        for (int j=0;j<ncols;j++) {
+         *buffer     = realloc(*buffer, sizeof(double)*  size  );
+        for (int j=0;j<*ncols;j++) {
            if ((*cols)[j].meta->dtnum == DATATYPE_STRING) {
               (*strbufs)[j] = realloc((*strbufs)[j],total_rows*(ODB_STRLEN+1));
         }
@@ -93,14 +92,14 @@ if (row_idx >= total_rows) {
             for (int i = 0; i < nci; i++) {
                 (*cols)[ncols_all].odb_col = i;
                 (*cols)[ncols_all].meta    = &(*ci)[i];
+
                 if ((*ci)[i].dtnum == DATATYPE_STRING) {
-                    (*strbufs)[ncols_all] = calloc(total_rows, ODB_STRLEN + 1);
+                    (*strbufs)[ ncols_all ] = calloc(total_rows, ODB_STRLEN + 1);
                     if (!(*strbufs)[ncols_all])
                         goto mem_error;
-                }
+                      }
                 ncols_all++;
             }
-
             *buffer = malloc(sizeof(double) * total_rows * ncols_all);
             if (!*buffer)
                 goto mem_error;
@@ -133,7 +132,6 @@ if (row_idx >= total_rows) {
                     (*buffer)[row_idx*ncols_all + j] = NAN;
                 }
                 else {
-
                     switch (pci->dtnum) {
                         case DATATYPE_INT1:
                         case DATATYPE_INT2:
@@ -158,7 +156,7 @@ if (row_idx >= total_rows) {
     odbdump_close(h);
     return 0;
 
-// Label 
+// errors Label 
 mem_error:
     if (*buffer) free(*buffer);
     if (*strbufs) {
@@ -177,43 +175,43 @@ mem_error:
 
 
 
-
-
-
 // Write into  NetCDF file                                    
 static int writeNetcdf(const char *outfile    ,
 		       char       *sql_query  ,  
                        double     *buffer     ,
-		       char      **strbufs , 
+		       char       *strbufs , 
                        int nrows,
                        int ncols,
                        nc_column_t *col)
 {
 
-// date & Time 
 
+// Debug  
+/*printf("---- STRING BUFFER ----\n");
+for (int r = 0; r < nrows; r++)
+{
+    char (*s)[ODB_STRLEN] = (char (*)[ODB_STRLEN])strbufs;
+    printf("%.*s\n", ODB_STRLEN, s[r]);
+//    printf("%.*s\n", ODB_STRLEN, strbufs + r*ODB_STRLEN);
+}*/
+
+// date & Time 
 char datetime[64];
 time_t now = time(NULL);
-struct tm *tm_info = gmtime(&now);   // ou localtime()
+struct tm *tm_info = gmtime(&now);   // localtime()
 strftime(datetime, sizeof(datetime), "%Y-%m-%d %H:%M:%S UTC", tm_info);
-
-
 // dims and vars 
-
     int ncid, dimid;
     int *varids = NULL;
     int ret;
     double fill = NAN;
-
     // create the file 
     ret = nc_create(outfile, NC_NETCDF4, &ncid);
     if (ret != NC_NOERR) {
         printf("NetCDF error: %s\n", nc_strerror(ret));
         return -1;
     }
-
-
-// convention  
+// NC conventions     
 nc_put_att_text(ncid, NC_GLOBAL,"Conventions", strlen("CF-1.10"), "CF-1.10");
 
 // The title & global attrib 
@@ -223,212 +221,213 @@ const char *institution = "(RMI) Royal Meteorological Institute of Belgium";
 const char *feature     = "point" ; 
 const char *data_source = "ECMWF ODB";
 const char *encoding    = "ODB (row-major)" ; 
-
-
 nc_put_att_text(ncid, NC_GLOBAL, "Title"      ,strlen(title)       , title);
 nc_put_att_text(ncid, NC_GLOBAL, "History"    ,strlen(history)     , history);
 nc_put_att_text(ncid, NC_GLOBAL, "Institution",strlen(institution) , institution);
+nc_put_att_text(ncid, NC_GLOBAL, "Creation_datetime",strlen(datetime) ,  datetime );
 nc_put_att_text(ncid, NC_GLOBAL, "Native_fomrat" ,strlen(data_source) , data_source );
 nc_put_att_text(ncid, NC_GLOBAL, "Encoding"   ,strlen(encoding)    , encoding);
 nc_put_att_text(ncid, NC_GLOBAL, "sql_query"  ,strlen(sql_query)   , sql_query);
 nc_put_att_text(ncid, NC_GLOBAL, "featureType",strlen(feature )    , feature );
-
-
 // dims 
  ret = nc_def_dim(ncid, "nobs", nrows, &dimid);
  if (ret != NC_NOERR) {
     printf("NetCDF error: %s\n", nc_strerror(ret));
     return -1;
  }
-
-
-// Vars 
+int strlen_dimid;
+size_t str_len = ODB_STRLEN;
+ret = nc_def_dim(ncid, "strlen", str_len, &strlen_dimid);
+if (ret != NC_NOERR) {
+    printf("NetCDF error: %s\n", nc_strerror(ret));
+    return -1;
+}
+// Vars allocation 
 varids = malloc(sizeof(int) * ncols);
 if (!varids) return -1;
 
-// Loop over the nc_colname_t  structure info 
+// Whether to write strings or numeric values 
+// the nc_colname_t  structure is here  !
 for (int i = 0; i < ncols; i++) {
         const char *name = col[i].meta->nickname ? col[i].meta->nickname: col[i].meta->name;
         char varname[128];
         strncpy(varname, name , sizeof(varname)-1);
         varname[sizeof(varname)-1] = '\0';
         sanitize_name(varname);
-
 	// define vars & attributes 	
 	if (strcmp(varname,"lat")==0 || strcmp(varname,"latitude")==0) {
          nc_put_att_text(ncid, varids[i], "units", strlen("degrees_north"),"degrees_north");
-         nc_put_att_text(ncid, varids[i],"standard_name",strlen("latitude"),"latitude");
-           }
-
+         nc_put_att_text(ncid, varids[i],"standard_name",strlen("latitude"),"latitude");           }
         if (strcmp(varname,"lon")==0 || strcmp(varname,"longitude")==0) {
          nc_put_att_text(ncid, varids[i], "units", strlen("degrees_east"), "degrees_east");
-         nc_put_att_text(ncid, varids[i], "standard_name", strlen("longitude"), "longitude");
-           }
+         nc_put_att_text(ncid, varids[i], "standard_name", strlen("longitude"), "longitude");           }
 
-
-
-
-/*if ( col[i].meta->dtnum	== DATATYPE_STRING)  {
-size_t size  =  nrows * ODB_STRLEN   ;
-int dimid;
-int varid;
-
-nc_def_dim(ncid, "strbuf_size", size, &dimid);
-nc_def_var(ncid, "strbufs"    , NC_STRING ,1, &dimid, &varid);
-nc_put_var_text(ncid, varid, *strbufs);
-}*/
-
-// Other variables 
-nc_def_var(ncid, varname,NC_DOUBLE, 1,  &dimid, &varids[i]);	
-
-// long name 
-nc_put_att_text(ncid, varids[i],"long_name",strlen(col[i].meta->name), col[i].meta->name);
+if (col[i].meta->dtnum == DATATYPE_STRING) {
+    int dimids[2] = {dimid, strlen_dimid};
+    ret = nc_def_var(ncid, varname, NC_CHAR, 2, dimids, &varids[i]);
+    if (ret != NC_NOERR) {
+        printf("NetCDF error: %s\n", nc_strerror(ret));
+        return -1;
+          }
+} else {
+    // Other variables
+    int dimids[1] = {dimid};
+    ret = nc_def_var(ncid, varname, NC_DOUBLE, 1, dimids, &varids[i]);
+    // long variable names ( @table   is not ommitted ) 
+    nc_put_att_text(ncid, varids[i],"long_name",strlen(col[i].meta->name), col[i].meta->name);
 
 // Missing values 
 nc_put_att_double(ncid, varids[i],"_FillValue", NC_DOUBLE, 1, &fill);
-    }
+if (ret != NC_NOERR) {
+    printf("NetCDF error: %s\n", nc_strerror(ret));
+    return -1;
+     }
+
+} // column type 
+}  //  for i 
+ 
+// End definition 
+nc_enddef(ncid);
 
 
-// Write buffer  values 
-size_t start[1], count[1];
-count[0]        = nrows;
+//write strings 
 for (int c = 0; c < ncols; c++) {
-    double *colbuf = malloc(sizeof(double) * nrows);
-    for (int r = 0; r < nrows; r++)  {
-        colbuf[r] = buffer[r*ncols + c];
+    if (col[c].meta->dtnum == DATATYPE_STRING) {
+        char *src = strbufs;
+        size_t start[2] = {0,0};
+        size_t count[2] = {nrows, ODB_STRLEN};
+        nc_put_vara_text(ncid, varids[c], start, count, src);
     }
-    start[0] = 0;
-    nc_put_vara_double(ncid,  varids[c], start, count, colbuf);
+}
+// Buffer numeric  
+size_t start[1] = {0};
+size_t count[1] = {nrows};
+for (int c = 0; c < ncols; c++) {
+    if (col[c].meta->dtnum == DATATYPE_STRING)
+        continue;
+    double *colbuf = malloc(sizeof(double) * nrows);
+    for (int r = 0; r < nrows; r++)
+        colbuf[r] = buffer[r*ncols + c];
+    //  to netcdf  
+    nc_put_vara_double(ncid, varids[c], start, count, colbuf);
     free(colbuf);
 }
-
-    nc_enddef(ncid);
     nc_close(ncid);
     free(varids);
     return 0;
 }
 
 
-// Python wrapper                                           
-static PyObject *odb2nc_method(PyObject *Py_UNUSED(self),
-                               PyObject *args,
-                               PyObject *kwargs)
-{
+
+
+
+// Main function wrapper to perform conversion ODB--> NetCDF
+static PyObject *odb2nc_method(PyObject *Py_UNUSED(self), PyObject *args, PyObject *kwargs){
     char *database  = NULL;
     char *sql_query = NULL;
-    char *ncfile    =NULL ; 
-    int   fcols     = 0   ;    
-    Bool ldegree    = true;
-    Bool lpbar      =false ;
-    Bool verbose    =false ;
-
-    static char *kwlist[] = {"database"   ,
-	                     "sql_query"  ,
-			     "nfunc"      ,
-                             "ncfile"     , 
-			     "lalon_deg" ,
-			     "pbar"       ,
-			     "verbose"    , 
-			     NULL};
-
-
-    // Options (Boolean args )
+    char *ncfile    = NULL;
+    int fcols = 0;
+    Bool ldegree = true;
+    Bool lpbar   = false;
+    Bool verbose = false;
+    static char *kwlist[] = {
+        "database",
+        "sql_query",
+        "nfunc",
+        "ncfile",
+        "lalon_deg",
+        "pbar",
+        "verbose",
+        NULL
+    };
+    PyObject *degree_obj = Py_True;
     PyObject *pbar  = Py_None;
     PyObject *pverb = Py_None;
-    Py_INCREF(pbar  );
-    Py_INCREF(pverb );
-
-    PyObject *degree_obj  = Py_True ;
-
-
-
     if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-                                     "ssis|OOO"  ,
-                                     kwlist    ,
-                                     &database , 
+                                     "ssis|OOO",
+                                     kwlist,
+                                     &database,
                                      &sql_query,
-                                     &fcols    , 
-				     &ncfile   ,
-                                     &degree_obj ,
-				     &pbar   ,
-				     &pverb 
-			              ))
+                                     &fcols,
+                                     &ncfile,
+                                     &degree_obj,
+                                     &pbar,
+                                     &pverb))
         return NULL;
-
-    ldegree   = PyObj_ToBool ( degree_obj , ldegree ) ;
-   
-
-    double *buffer = NULL;
-    char   **strbufs = NULL ; 
+    ldegree = PyObj_ToBool(degree_obj, ldegree);
+    lpbar   = PyObj_ToBool(pbar, lpbar);
+    verbose = PyObj_ToBool(pverb, verbose);
+    double *buffer  = NULL;
+    char   **strbufs = NULL;
     int nrows = 0;
     int ncols = 0;
-
     nc_column_t *cols = NULL;
     colinfo_t   *ci   = NULL;
 
-    // Conversion to boolean C variable
-    lpbar   = PyObj_ToBool ( pbar , lpbar      ) ;
-    verbose = PyObj_ToBool ( pverb , verbose   ) ;
-
-
-
-    if (rows4nc(database,
-                sql_query,
-                fcols,
-                NULL,
-                &buffer,
-		&strbufs,  
-                &nrows,
-                &ncols,
-                &cols,
-                &ci  ,
-		lpbar  ) != 0)
+    // Get rows 
+    if (rows4nc(database, sql_query, fcols, NULL,
+                &buffer, &strbufs,
+                &nrows, &ncols,
+                &cols, &ci,
+                lpbar) != 0)
     {
-        PyErr_SetString(PyExc_RuntimeError,"--odb4py : failed to get rows from ODB before encoding");
+        PyErr_SetString(PyExc_RuntimeError, "--odb4py : failed to get rows from ODB for NetCDF encoding");
         return NULL;
     }
 
+    //   Convert coordinates        
+    //   If it's not in degrees , force conversion  
+    //   ldegree is infered from  the sql query  
+    if (!ldegree) {
+        if (verbose)
+            printf("Coordinates converted radians → degrees\n");
 
-// Force coordinate in degrees 
-if (!ldegree ) { 
-   if (verbose ){
-     printf( "%s\n" , "Coordinates are in radians --> converted to degrees in NetCDF file. " ) ; 
-   }
-    convert_rad_to_deg(buffer, nrows, ncols, cols);     
-}
-
-/*for (int j = 0; j < ncols; j++) {
-    const char *name =
-        cols[j].meta->nickname ?
-        cols[j].meta->nickname :
-        cols[j].meta->name;        
-        printf("col %d : %s\n", j, name);
-}
-for (int r = 0; r < nrows && r < 100 ; r++) {
-    for (int c = 0; c < ncols; c++) {
-	    printf( "%s\n" ,  (*cols)[c].meta.units    )  ; 
-
+        convert_rad_to_deg(buffer, nrows, ncols, cols);
     }
-    printf("\n");
-}
-for (int r = 0; r < nrows && r < 100 ; r++) {
+
+    // Allocate buffer for string 
+    size_t str_len = ODB_STRLEN;
+    char *buffer_str  = malloc(nrows * str_len);
+    if (!buffer_str) {
+        PyErr_SetString(PyExc_RuntimeError,
+            "--odb4py : Failed to allocate string buffer string for NetCDF encoding");
+        return NULL;
+    }
+
+    //  Get string values 
     for (int c = 0; c < ncols; c++) {
         if (cols[c].meta->dtnum == DATATYPE_STRING) {
-            char *s =
-                &strbufs[c][r * (ODB_STRLEN+1)];
-            printf("row %d col %d : %s\n", r, c, s);
+            char *src = strbufs[c];
+            char *dst = buffer_str;
+
+            for (int r = 0; r < nrows; r++) {
+                memcpy(dst, src, str_len);
+                dst += str_len;
+                src += str_len + 1;
+            }
+
+	    // Better to send the both type at once 
+            /*writeNetcdf_string_column(
+                ncfile,
+                sql_query,
+                c,
+                col_buf,
+                nrows,
+                str_len,
+                cols
+            );*/
         }
     }
-}*/
 
 
-    // To nc  
-    writeNetcdf( ncfile , sql_query ,buffer, strbufs, nrows, ncols, cols);
+    writeNetcdf(ncfile,sql_query,buffer, buffer_str , nrows, ncols, cols );
 
-
+    free(buffer_str);
     free(buffer);
     free(cols);
-    if (ci) odbdump_destroy_colinfo(ci, 0);
+
+    if (ci)
+        odbdump_destroy_colinfo(ci, 0);
 
     Py_RETURN_NONE;
 }
