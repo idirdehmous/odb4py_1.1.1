@@ -22,10 +22,10 @@ include(odb_add_schema)
 include(odb_link_schemas)
 include(odb_set_environment)
 
+
 # Compilation 
 add_subdirectory(odb )              # genarate odb binaries + libodb*.so  
 add_subdirectory(bindings)          # generate odb4py.so  
-
 
 # __init__
 install( FILES  ${CMAKE_SOURCE_DIR}/__init__.py     DESTINATION   . )
