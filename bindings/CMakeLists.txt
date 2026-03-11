@@ -12,10 +12,15 @@ message(STATUS "NumPy include dir: ${NumPy_INCLUDE_DIR}")
 add_library(   core    MODULE  main.c  )
 
 # Inclure les headers Python + headers ODB
-target_include_directories(core  PRIVATE  ${Python3_INCLUDE_DIRS}     ${NumPy_INCLUDE_DIR}     ${CMAKE_SOURCE_DIR}/include )
+target_include_directories(core  PRIVATE  ${Python3_INCLUDE_DIRS}     
+	                                  ${NumPy_INCLUDE_DIR}     
+					  ${CMAKE_SOURCE_DIR}/include 
+  					 )
 
 # Use only the python modules 
-target_link_libraries(core PRIVATE Python3::Module odb_lib)
+target_link_libraries(core PRIVATE Python3::Module 
+	                           odb_lib  
+				   )
 
 # Module output name  (.so) to be imported in python 
 set_target_properties(core  PROPERTIES
