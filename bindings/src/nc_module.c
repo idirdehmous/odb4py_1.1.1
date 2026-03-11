@@ -16,6 +16,9 @@
 #include "pyspam.h"
 #include "rows.h"
 #include "ncdf.h"
+#include "odb.h"
+#include "idx.h"
+#include "info.h"
 
 
 
@@ -44,18 +47,29 @@ static int rows4nc(char *database,
     size_t ip       = 0 ;
     size_t prog_max = 0 ;
 
-    int total_rows = getMaxrows(database, sql_query, poolmask);
 
+//info = sql_prepare_func(h , sql_query ? sql_query : queryfile, NULL,  NULL );
+//if (!info) {
+//    printf("sql_prepare_func failed\n");
+//    return;
+//}
+//if (info->dir)
+//    printf("dir: %s\n", info->dir);
+// the right db handler 
+//db_handle = ODBc_open(database, "r", &npools, &ntables, poolmask);
+
+
+    int total_rows = getMaxrows(database, sql_query, poolmask);
     if (total_rows <= 0) {
         printf("--odb4py : ODB query returned zero rows\n");
         return -1;
     }
 
     h = odbdump_open(database, sql_query, NULL, NULL, NULL, &maxcols);
-    if (!h || maxcols <= 0) {
-        printf("--odb4py : Failed to open ODB\n");
+    if (!h || maxcols <= 0) {  printf("--odb4py : Failed to open ODB\n");
         return -1;
     }
+
     double *d = malloc(sizeof(double) * maxcols);
     if (!d) {
         odbdump_close(h);
@@ -176,7 +190,8 @@ mem_error:
 
 
 // Write into  NetCDF file                                    
-static int writeNetcdf(const char *outfile    ,
+static int writeNetcdf(const char *database   ,
+		       const char *outfile    ,
 		       char       *sql_query  ,  
                        double     *buffer     ,
 		       char       *strbufs , 
@@ -200,6 +215,31 @@ char datetime[64];
 time_t now = time(NULL);
 struct tm *tm_info = gmtime(&now);   // localtime()
 strftime(datetime, sizeof(datetime), "%Y-%m-%d %H:%M:%S UTC", tm_info);
+
+// Analysis datetime 
+// We use a function from odb.h   header  
+int date_odb;
+int time_odb;
+int yyyymmdd_loc, hhmmss_loc ;
+
+codb_analysis_datetime_(&date_odb, &time_odb);
+codb_datetime_(&yyyymmdd_loc, &hhmmss_loc);
+
+int size = 512  ; 
+char ddfile [ size ]  ;
+build_dd_path (database ,  ddfile  , size  ) ; 
+
+int ana_date =0; 
+int ana_time =0; 
+
+scan_dd_file ( database  , &ana_date , &ana_time  )  ;
+printf( "Path to dd file %s , anadate %d   anatime  =%d  \n" , ddfile , ana_date  , ana_time  )  ; 
+
+
+
+//printf( "%d  %d  %d  %d  \n" , date_odb, time_odb,  yyyymmdd_loc, hhmmss_loc ) ; 
+//printf ( "%s\n" , database  )  ; 
+
 // dims and vars 
     int ncid, dimid;
     int *varids = NULL;
@@ -229,6 +269,10 @@ nc_put_att_text(ncid, NC_GLOBAL, "Native_fomrat" ,strlen(data_source) , data_sou
 nc_put_att_text(ncid, NC_GLOBAL, "Encoding"   ,strlen(encoding)    , encoding);
 nc_put_att_text(ncid, NC_GLOBAL, "sql_query"  ,strlen(sql_query)   , sql_query);
 nc_put_att_text(ncid, NC_GLOBAL, "featureType",strlen(feature )    , feature );
+
+
+
+
 // dims 
  ret = nc_def_dim(ncid, "nobs", nrows, &dimid);
  if (ret != NC_NOERR) {
@@ -420,7 +464,7 @@ static PyObject *odb2nc_method(PyObject *Py_UNUSED(self), PyObject *args, PyObje
     }
 
 
-    writeNetcdf(ncfile,sql_query,buffer, buffer_str , nrows, ncols, cols );
+    writeNetcdf( database ,  ncfile,sql_query,buffer, buffer_str , nrows, ncols, cols );
 
     free(buffer_str);
     free(buffer);
