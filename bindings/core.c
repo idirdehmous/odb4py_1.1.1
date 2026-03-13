@@ -8,6 +8,8 @@
 #include "dca_module.c"
 
 
+
+
 PyDoc_STRVAR(open_doc      , "A C/python wrapper of the original ODBc_open method. Establish a connection to the ODB and initalize its paths and structures");
 PyDoc_STRVAR(close_doc     , "Closes a connection to an opened ODB");
 PyDoc_STRVAR(npar_doc      , "Fetch ODB rows as a numpy array with optional header containing column names." );
