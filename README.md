@@ -2,7 +2,7 @@
 [![Documentation Status](https://readthedocs.org/projects/odb4py/badge/?version=latest)](https://odb4py.readthedocs.io)
 ![Python](https://img.shields.io/pypi/pyversions/odb4py)
 
-# odb4py 1.1.2 release
+# odb4py 1.3.1release
 
 ## Description
 

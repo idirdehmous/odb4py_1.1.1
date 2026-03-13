@@ -1,0 +1,23 @@
+ODB_SRCPATH_ECMA=/hpcperm/cvah/rmib_dev/odb4py_1.1.2/examples/odb_samples/rmi/ECMA.synop
+ODB_DATAPATH_ECMA=/hpcperm/cvah/rmib_dev/odb4py_1.1.2/examples/odb_samples/rmi/ECMA.synop
+ODB_IDXPATH_ECMA=/hpcperm/cvah/rmib_dev/odb4py_1.1.2/examples/odb_samples/rmi/ECMA.synop/idx
+*** /hpcperm/cvah/pkg/src/odb_api_bundle_custom/odb/src/aux/newio.c:init_IOs() ***
+	ODB_WRITE_EMPTY_FILES=0
+	  ODB_CONSIDER_TABLES=*
+	   ODB_IO_KEEP_INCORE=1
+	      ODB_IO_FILESIZE=32 MB
+	       ODB_IO_BUFSIZE=4194304 bytes
+	       ODB_IO_GRPSIZE=1 (or max no. of pools)
+	       ODB_IO_PROFILE=0
+	       ODB_IO_VERBOSE=0
+	        ODB_IO_METHOD=5
+	          ODB_VERSION=CY43R0.000 (software release)
+	          ODB_IO_LOCK=0
+*********************
+ODB_CONSIDER_TABLES=*
+ODB_WRITE_TABLES=*
+***INFO: Poolmasking ignored altogether for database 'ECMA'
+ODB_SRCPATH_ECMA=/hpcperm/cvah/rmib_dev/odb4py_1.1.2/examples/odb_samples/rmi/ECMA.synop
+ODB_DATAPATH_ECMA=/hpcperm/cvah/rmib_dev/odb4py_1.1.2/examples/odb_samples/rmi/ECMA.synop
+ODB_IDXPATH_ECMA=/hpcperm/cvah/rmib_dev/odb4py_1.1.2/examples/odb_samples/rmi/ECMA.synop/idx
+***INFO: Poolmasking ignored altogether for database 'ECMA'

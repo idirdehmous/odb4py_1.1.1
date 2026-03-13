@@ -311,7 +311,10 @@ static  PyObject* odb_close_method(PyObject *Py_UNUSED(self), PyObject *args)
     }
 
 
-   if (handle =! 1) { handle =1 ; }
+   if (handle =! 1) 
+      { 
+	      handle =1 ; 
+      }
    if   (!free_handles || handle < 1 || handle > maxhandle)  {
         fprintf(stderr,
             "--odb4py : invalid handle %d\n", handle);

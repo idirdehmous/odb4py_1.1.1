@@ -45,3 +45,9 @@ odb4py_0.1.0
 - v1.1.2 Patch the  program poolmasking.c  , print only necessary info concerning the poolmask 
 - v1.1.2 Add the poolmasking option to the odbDca method 
 - v1.1.2 Clean the methods getting the ODB attributes 
+
+
+## [Release]
+- VERSION 1.3.1
+- v1.3.1 Add the conversion feature. Able to convert to ODB2 and Netcdf for the moment.
+- v1.3.1 split the methods into context submodules  core, info and convert
