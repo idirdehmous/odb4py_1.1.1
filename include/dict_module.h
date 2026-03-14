@@ -1,6 +1,6 @@
 #ifndef DICT_MODULE_H
 #define DICT_MODULE_H
 
-PyObject *odb_dict_method(PyObject *self, PyObject *args, PyObject *kwargs)  ;
+static PyObject *odb_dict_method(PyObject *self, PyObject *args, PyObject *kwargs)  ;
 #endif
 
