@@ -32,9 +32,10 @@ pip install odb4py
 ```
 
 ## Installation test 
-`from odb4py import core   # The C extension` <br>
-`from odb4py import utils  # The python module helper` 
-
+`>>> from odb4py import core      # The extension core ` <br>
+`>>> from odb4py import utils     # The python module helper`
+`>>> from odb4py import convert   # Conversion module  
+`>>> from odb4py import info      # Get general info on the ODB software`  
 
 
 ## Requirements
